@@ -18,29 +18,32 @@ String? _getRedirectLocation(
   String location,
   SupabaseClient supabase,
   UserRole? role,
+  GoRouterState state,
 ) {
   final isAuth = supabase.auth.currentUser != null;
 
-  // Public routes that don't require auth
+  // Define public routes
   final isPublicRoute =
       location == '/splash' ||
       location == '/onboarding' ||
       location == '/select-role' ||
-      location == '/signup' ||
       location == '/login' ||
+      location == '/signup' ||
       location == '/forgot-password';
 
-  // If not authenticated and trying to access a protected route
-  if (!isAuth && !isPublicRoute) {
-    return '/onboarding';
+  // If trying to access signup without role selected, redirect to role selection
+  if (location == '/signup' && role == null) {
+    return '/select-role';
   }
 
-  // If authenticated
-  if (isAuth) {
-    // For authenticated users, always redirect to their dashboard
-    final userRole = role;
-    if (userRole != null) {
-      switch (userRole) {
+  // For authenticated users with role
+  if (isAuth && role != null) {
+    // Don't redirect if user is trying to logout
+    if (location == '/login') return null;
+
+    // Redirect to dashboard if trying to access auth or onboarding screens
+    if (isPublicRoute) {
+      switch (role) {
         case UserRole.tutor:
           return '/tutor';
         case UserRole.student:
@@ -49,6 +52,19 @@ String? _getRedirectLocation(
           return '/parent';
       }
     }
+  }
+
+  // For authenticated users without role
+  if (isAuth && role == null && location == '/signup') {
+    return '/select-role';
+  }
+
+  // For unauthenticated users
+  if (!isAuth) {
+    // Allow public routes
+    if (isPublicRoute) return null;
+    // Redirect to onboarding for other routes
+    return '/onboarding';
   }
 
   return null;
@@ -60,7 +76,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
 
   return GoRouter(
     redirect: (context, state) {
-      return _getRedirectLocation(state.uri.path, supabase, role);
+      return _getRedirectLocation(state.uri.path, supabase, role, state);
     },
     initialLocation: '/splash',
     routes: [
