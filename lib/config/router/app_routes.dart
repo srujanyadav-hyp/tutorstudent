@@ -2,15 +2,15 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../../features/auth/login_screen.dart';
-import '../../features/auth/signup_screen.dart';
-import '../../features/auth/forget_password_screen.dart';
-import '../../features/onboarding/splash_screen.dart';
-import '../../features/onboarding/onboarding_screen.dart';
-import '../../features/onboarding/role_selection_screen.dart';
-import '../../features/tutor/tutor_dashboard.dart';
-import '../../features/student/student_dashboard.dart';
-import '../../features/parent/parent_dashboard.dart';
+import '../../features/auth/screens/login_screen.dart';
+import '../../features/auth/screens/signup_screen.dart';
+import '../../features/auth/screens/forget_password_screen.dart';
+import '../../features/onboarding/screens/splash_screen.dart';
+import '../../features/onboarding/screens/onboarding_screen.dart';
+import '../../features/onboarding/screens/role_selection_screen.dart';
+import '../../features/tutor/screens/tutor_dashboard.dart';
+import '../../features/student/screens/student_dashboard.dart';
+import '../../features/parent/screens/parent_dashboard.dart';
 import '../../models/user_role.dart';
 import '../../providers/role_provider.dart';
 

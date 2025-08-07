@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'widgets/auth_form_card.dart';
-import '../../core/utils/validators.dart';
-import '../../providers/role_provider.dart';
-import 'controller/auth_controller.dart';
+import '../widgets/auth_form_card.dart';
+import '../../../core/utils/validators.dart';
+import '../../../providers/role_provider.dart';
+import '../controller/auth_controller.dart';
 
 class SignupScreen extends ConsumerStatefulWidget {
   const SignupScreen({super.key});

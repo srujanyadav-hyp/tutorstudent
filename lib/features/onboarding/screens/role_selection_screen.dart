@@ -3,8 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../models/user_role.dart';
 import '../../../providers/role_provider.dart';
-import '../../../core/services/auth_service.dart';
-import '../models/onboarding_data.dart';
 
 class RoleSelectionScreen extends ConsumerWidget {
   const RoleSelectionScreen({super.key});

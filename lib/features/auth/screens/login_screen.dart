@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../auth/widgets/auth_form_card.dart';
-import '../../core/utils/validators.dart';
-import '../auth/controller/auth_controller.dart';
+import '../widgets/auth_form_card.dart';
+import '../../../core/utils/validators.dart';
+import '../controller/auth_controller.dart';
 
-class ForgotPasswordScreen extends ConsumerStatefulWidget {
-  const ForgotPasswordScreen({super.key});
+class LoginScreen extends ConsumerStatefulWidget {
+  const LoginScreen({super.key});
 
   @override
-  ConsumerState<ForgotPasswordScreen> createState() =>
-      _ForgotPasswordScreenState();
+  ConsumerState<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
+class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final emailController = TextEditingController();
+  final passwordController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -24,29 +24,41 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
     return Scaffold(
       body: Center(
         child: AuthFormCard(
-          title: 'Forgot Password',
+          title: 'Login',
           formKey: _formKey,
           isLoading: isLoading,
-          buttonText: isLoading ? 'Sending...' : 'Send Reset Link',
-          bottomText: 'Back to Login',
-          onBottomPressed: () => context.go('/login'),
+          buttonText: isLoading ? 'Logging in...' : 'Login',
           onPressed: isLoading
               ? null
               : () {
                   if (_formKey.currentState!.validate()) {
                     ref
                         .read(authControllerProvider.notifier)
-                        .resetPassword(
+                        .login(
                           context: context,
                           email: emailController.text,
+                          password: passwordController.text,
                         );
                   }
                 },
+          bottomText: "Don't have an account? Sign up",
+          onBottomPressed: () {
+            context.go('/signup');
+          },
+          forgotPassword: () {
+            context.go('/forgot-password');
+          },
           children: [
             TextFormField(
               controller: emailController,
               decoration: const InputDecoration(labelText: 'Email'),
               validator: Validators.email,
+            ),
+            TextFormField(
+              controller: passwordController,
+              decoration: const InputDecoration(labelText: 'Password'),
+              obscureText: true,
+              validator: Validators.password,
             ),
           ],
         ),
