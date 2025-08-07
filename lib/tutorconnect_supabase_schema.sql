@@ -164,8 +164,13 @@ ALTER TABLE payments ENABLE ROW LEVEL SECURITY;
 -- -----------------------------
 
 -- USERS
+-- Allow users to read and update their own profile
 CREATE POLICY "Users access own profile" ON users
 FOR SELECT, UPDATE USING (auth.uid() = id);
+
+-- Allow insertion during signup
+CREATE POLICY "Allow insert during signup" ON users
+FOR INSERT WITH CHECK (auth.uid() = id);
 
 -- TUTORS
 CREATE POLICY "Tutor manages own data" ON tutors
