@@ -27,13 +27,6 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
           title: 'Forgot Password',
           formKey: _formKey,
           isLoading: isLoading,
-          children: [
-            TextFormField(
-              controller: emailController,
-              decoration: const InputDecoration(labelText: 'Email'),
-              validator: Validators.email,
-            ),
-          ],
           buttonText: isLoading ? 'Sending...' : 'Send Reset Link',
           bottomText: 'Back to Login',
           onBottomPressed: () => context.go('/login'),
@@ -49,6 +42,13 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                         );
                   }
                 },
+          children: [
+            TextFormField(
+              controller: emailController,
+              decoration: const InputDecoration(labelText: 'Email'),
+              validator: Validators.email,
+            ),
+          ],
         ),
       ),
     );

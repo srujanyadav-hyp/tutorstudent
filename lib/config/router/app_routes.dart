@@ -1,6 +1,6 @@
 import 'package:go_router/go_router.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../features/auth/login_screen.dart';
 import '../../features/auth/signup_screen.dart';
@@ -16,14 +16,30 @@ import '../../providers/role_provider.dart';
 
 final goRouterProvider = Provider<GoRouter>((ref) {
   final role = ref.watch(userRoleProvider);
+  final supabase = Supabase.instance.client;
 
   return GoRouter(
     initialLocation: '/splash',
     routes: [
-      // Onboarding Routes
+      // Initial Routes
       GoRoute(
         path: '/splash',
-        builder: (context, state) => const SplashScreen(),
+        builder: (context, state) {
+          // If user is already logged in, redirect to dashboard
+          if (supabase.auth.currentUser != null) {
+            switch (role) {
+              case UserRole.tutor:
+                return const TutorDashboard();
+              case UserRole.student:
+                return const StudentDashboard();
+              case UserRole.parent:
+                return const ParentDashboard();
+              case null:
+                return const OnboardingScreen();
+            }
+          }
+          return const SplashScreen();
+        },
       ),
       GoRoute(
         path: '/onboarding',
@@ -31,9 +47,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/select-role',
-        builder: (context, state) => RoleSelectionScreen(
-          signupData: state.extra as Map<String, String>?,
-        ),
+        builder: (context, state) => const RoleSelectionScreen(),
       ),
 
       // Auth Routes

@@ -5,8 +5,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../models/user_role.dart';
 import '../../providers/role_provider.dart';
-import 'onboarding_screen.dart';
-import 'role_selection_screen.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});

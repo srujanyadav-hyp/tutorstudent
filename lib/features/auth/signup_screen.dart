@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'widgets/auth_form_card.dart';
 import '../../core/utils/validators.dart';
+import '../../providers/role_provider.dart';
 import 'controller/auth_controller.dart';
 
 class SignupScreen extends ConsumerStatefulWidget {
@@ -38,6 +39,40 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
           title: 'Sign Up',
           formKey: _formKey,
           isLoading: isLoading,
+          buttonText: isLoading ? 'Creating...' : 'Next',
+          onPressed: isLoading
+              ? null
+              : () {
+                  if (_formKey.currentState!.validate()) {
+                    // Get selected role from provider
+                    final role = ref.read(userRoleProvider);
+                    if (role == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Please select your role first'),
+                        ),
+                      );
+                      context.go('/select-role');
+                      return;
+                    }
+
+                    // Process signup with the selected role
+                    ref
+                        .read(authControllerProvider.notifier)
+                        .signUp(
+                          context: context,
+                          email: emailController.text,
+                          password: passwordController.text,
+                          fullName: fullNameController.text,
+                          role: role,
+                          phone: phoneController.text,
+                        );
+                  }
+                },
+          bottomText: "Already have an account? Login",
+          onBottomPressed: () {
+            context.go('/login');
+          },
           children: [
             TextFormField(
               controller: fullNameController,
@@ -67,26 +102,6 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
               validator: Validators.password,
             ),
           ],
-          buttonText: isLoading ? 'Creating...' : 'Next',
-          onPressed: isLoading
-              ? null
-              : () {
-                  if (_formKey.currentState!.validate()) {
-                    context.go(
-                      '/select-role',
-                      extra: {
-                        'fullName': fullNameController.text,
-                        'email': emailController.text,
-                        'password': passwordController.text,
-                        'phone': phoneController.text,
-                      },
-                    );
-                  }
-                },
-          bottomText: "Already have an account? Login",
-          onBottomPressed: () {
-            context.go('/login');
-          },
         ),
       ),
     );

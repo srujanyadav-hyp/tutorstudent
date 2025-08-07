@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/user_role.dart';
-import '../core/services/supabase_service.dart';
 import '../core/providers/supabase_provider.dart';
 import 'role_provider.dart';
 

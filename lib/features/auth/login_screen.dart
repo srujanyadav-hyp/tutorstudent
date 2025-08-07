@@ -27,19 +27,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           title: 'Login',
           formKey: _formKey,
           isLoading: isLoading,
-          children: [
-            TextFormField(
-              controller: emailController,
-              decoration: const InputDecoration(labelText: 'Email'),
-              validator: Validators.email,
-            ),
-            TextFormField(
-              controller: passwordController,
-              decoration: const InputDecoration(labelText: 'Password'),
-              obscureText: true,
-              validator: Validators.password,
-            ),
-          ],
           buttonText: isLoading ? 'Logging in...' : 'Login',
           onPressed: isLoading
               ? null
@@ -61,6 +48,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           forgotPassword: () {
             context.go('/forgot-password');
           },
+          children: [
+            TextFormField(
+              controller: emailController,
+              decoration: const InputDecoration(labelText: 'Email'),
+              validator: Validators.email,
+            ),
+            TextFormField(
+              controller: passwordController,
+              decoration: const InputDecoration(labelText: 'Password'),
+              obscureText: true,
+              validator: Validators.password,
+            ),
+          ],
         ),
       ),
     );
