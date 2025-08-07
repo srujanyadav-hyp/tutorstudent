@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:tutorconnect/models/user_role.dart';
 
-enum UserRole { student, tutor, parent }
+class AppTheme {
+  static ThemeData get lightTheme => RoleTheme.getTheme(UserRole.student);
+  static ThemeData get darkTheme =>
+      RoleTheme.getTheme(UserRole.student); // You can customize this later
+}
 
 class RoleTheme {
   static ThemeData getTheme(UserRole role) {
