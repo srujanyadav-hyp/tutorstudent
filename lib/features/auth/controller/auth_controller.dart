@@ -26,7 +26,6 @@ class AuthController extends StateNotifier<bool> {
     required String email,
     required String password,
     required String fullName,
-    required UserRole role,
     String? phone,
     String? profileImage,
   }) async {
@@ -37,11 +36,17 @@ class AuthController extends StateNotifier<bool> {
       if (email.trim().isEmpty) throw 'Email is required';
       if (password.length < 6) throw 'Password must be at least 6 characters';
 
+      // Get the selected role from role provider
+      final selectedRole = _ref.read(userRoleProvider);
+      if (selectedRole == null) {
+        throw 'Please select a role first';
+      }
+
       final response = await _supabaseService.signUp(
         email: email,
         password: password,
         fullName: fullName,
-        role: role.toString().split('.').last,
+        role: selectedRole.toString().split('.').last,
         phone: phone,
         profileImage: profileImage,
       );
@@ -50,23 +55,30 @@ class AuthController extends StateNotifier<bool> {
         throw 'Signup failed: No user data returned';
       }
 
-      // Create role-specific profile
       final userId = response.user!.id;
-      switch (role) {
-        case UserRole.tutor:
-          await _supabaseService.createTutorProfile(userId: userId);
-          break;
-        case UserRole.student:
-          // For students, we'll need to assign a tutor later
-          break;
-        case UserRole.parent:
-          // For parents, we'll need to link with students later
-          break;
-      }
 
-      _showMessage(context, 'Signup successful! Please log in.');
-      if (context.mounted) {
-        context.go('/login');
+      try {
+        // Additional profile setup based on role
+        switch (selectedRole) {
+          case UserRole.student:
+            await _supabaseService.createStudentProfile(studentId: userId);
+            break;
+          case UserRole.tutor:
+            // Tutors don't need an additional profile yet
+            break;
+          case UserRole.parent:
+            // Parents don't need an additional profile yet
+            break;
+        }
+
+        _showMessage(context, 'Signup successful! Please log in.');
+        if (context.mounted) {
+          context.go('/login');
+        }
+      } catch (profileError) {
+        // If profile creation fails, delete the auth user
+        await _supabaseService.client.auth.admin.deleteUser(userId);
+        throw 'Failed to create user profile: ${profileError.toString()}';
       }
     } catch (e) {
       _showMessage(context, ErrorHandler.getMessage(e));
@@ -152,23 +164,19 @@ class AuthController extends StateNotifier<bool> {
   Future<UserRole> _getUserRole(String userId) async {
     try {
       final response = await _supabaseService.client
-          .from('users')
+          .from('user_profiles')
           .select('role')
           .eq('id', userId)
           .single();
 
-      switch (response['role']) {
-        case 'student':
-          return UserRole.student;
-        case 'tutor':
-          return UserRole.tutor;
-        case 'parent':
-          return UserRole.parent;
-        default:
-          return UserRole.student;
-      }
+      return switch (response['role']) {
+        'student' => UserRole.student,
+        'tutor' => UserRole.tutor,
+        'parent' => UserRole.parent,
+        _ => throw 'Invalid user role'
+      };
     } catch (e) {
-      return UserRole.student;
+      throw 'Failed to get user role: ${e.toString()}';
     }
   }
 

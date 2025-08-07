@@ -21,9 +21,9 @@ class RoleSelectionScreen extends ConsumerWidget {
         onTap: () async {
           // Store selected role in provider
           await ref.read(userRoleProvider.notifier).setRole(role);
-          // Navigate to signup
+          // Navigate to login screen first
           if (context.mounted) {
-            context.go('/signup');
+            context.go('/login');
           }
         },
         child: Padding(

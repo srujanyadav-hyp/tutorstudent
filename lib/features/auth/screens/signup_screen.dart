@@ -57,15 +57,14 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                     }
 
                     // Process signup with the selected role
-                    ref
-                        .read(authControllerProvider.notifier)
-                        .signUp(
+                    ref.read(authControllerProvider.notifier).signUp(
                           context: context,
-                          email: emailController.text,
+                          email: emailController.text.trim(),
                           password: passwordController.text,
-                          fullName: fullNameController.text,
-                          role: role,
-                          phone: phoneController.text,
+                          fullName: fullNameController.text.trim(),
+                          phone: phoneController.text.trim().isNotEmpty
+                              ? phoneController.text.trim()
+                              : null,
                         );
                   }
                 },
@@ -92,8 +91,10 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
             ),
             TextFormField(
               controller: phoneController,
-              decoration: const InputDecoration(labelText: 'Phone (Optional)'),
+              decoration: const InputDecoration(
+                  labelText: 'Phone (Optional)', hintText: 'e.g., +1234567890'),
               keyboardType: TextInputType.phone,
+              validator: Validators.phone,
             ),
             TextFormField(
               controller: passwordController,

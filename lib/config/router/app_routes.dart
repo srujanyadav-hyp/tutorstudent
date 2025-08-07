@@ -22,12 +22,14 @@ String? _getRedirectLocation(
 ) {
   final isAuth = supabase.auth.currentUser != null;
 
-  // If user is authenticated, direct them to their dashboard
+  // For authenticated users
   if (isAuth && role != null) {
-    // Only redirect if trying to access auth or onboarding screens
+    // Direct to dashboard if trying to access auth or onboarding screens
     if (location == '/splash' ||
         location == '/onboarding' ||
-        location == '/login') {
+        location == '/select-role' ||
+        location == '/login' ||
+        location == '/signup') {
       switch (role) {
         case UserRole.tutor:
           return '/tutor';
@@ -46,10 +48,20 @@ String? _getRedirectLocation(
     if (location.startsWith('/tutor') ||
         location.startsWith('/student') ||
         location.startsWith('/parent')) {
-      // If they already selected a role, send them to signup instead of onboarding
-      if (role != null) {
-        return '/signup';
+      return '/login';
+    }
+
+    // Enforce onboarding flow
+    if (location == '/signup' || location == '/login') {
+      if (role == null) {
+        // If no role is selected, redirect to role selection
+        return '/select-role';
       }
+    }
+
+    // If trying to access role selection without seeing onboarding
+    if (location == '/select-role' &&
+        !state.extra.toString().contains('fromOnboarding')) {
       return '/onboarding';
     }
   }

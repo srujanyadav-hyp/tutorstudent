@@ -31,6 +31,8 @@ class SupabaseService {
     required String password,
     required String role,
     required String fullName,
+    String? phone,
+    String? profileImage,
   }) async {
     try {
       // First create the auth user
@@ -49,28 +51,13 @@ class SupabaseService {
                 'role': role,
                 'full_name': fullName,
                 'email': email,
+                'phone': phone,
+                'profile_image': profileImage,
+                'created_at': DateTime.now().toIso8601String(),
+                'updated_at': DateTime.now().toIso8601String(),
               })
               .select()
               .single();
-
-          // Create role-specific profile based on role
-          if (role == 'tutor') {
-            await client
-                .from('students')
-                .insert({
-                  'id': response.user!.id,
-                })
-                .select()
-                .single();
-          } else if (role == 'student') {
-            await client
-                .from('students')
-                .insert({
-                  'id': response.user!.id,
-                })
-                .select()
-                .single();
-          }
         } catch (e) {
           // If profile creation fails, delete the auth user
           await client.auth.admin.deleteUser(response.user!.id);

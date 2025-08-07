@@ -37,7 +37,7 @@ class OnboardingScreen extends StatelessWidget {
               const SizedBox(height: 40),
               ElevatedButton(
                 onPressed: () {
-                  context.go('/select-role');
+                  context.go('/select-role', extra: {'fromOnboarding': true});
                 },
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(
