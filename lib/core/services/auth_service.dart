@@ -81,17 +81,12 @@ class AuthService {
     final user = _supabaseClient.auth.currentUser;
     if (user == null) throw Exception('No user logged in');
 
-    await _supabaseClient.from('users').upsert({
-      'id': user.id,
-      'role': role,
-    });
+    await _supabaseClient.from('users').upsert({'id': user.id, 'role': role});
 
     // Create role-specific profile
     switch (role) {
       case 'tutor':
-        await _supabaseClient.from('tutors').upsert({
-          'user_id': user.id,
-        });
+        await _supabaseClient.from('tutors').upsert({'user_id': user.id});
         break;
       case 'student':
         // Students will be linked to tutors later
