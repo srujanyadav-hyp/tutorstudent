@@ -22,27 +22,12 @@ String? _getRedirectLocation(
 ) {
   final isAuth = supabase.auth.currentUser != null;
 
-  // Define public routes
-  final isPublicRoute =
-      location == '/splash' ||
-      location == '/onboarding' ||
-      location == '/select-role' ||
-      location == '/login' ||
-      location == '/signup' ||
-      location == '/forgot-password';
-
-  // If trying to access signup without role selected, redirect to role selection
-  if (location == '/signup' && role == null) {
-    return '/select-role';
-  }
-
-  // For authenticated users with role
+  // If user is authenticated, direct them to their dashboard
   if (isAuth && role != null) {
-    // Don't redirect if user is trying to logout
-    if (location == '/login') return null;
-
-    // Redirect to dashboard if trying to access auth or onboarding screens
-    if (isPublicRoute) {
+    // Only redirect if trying to access auth or onboarding screens
+    if (location == '/splash' ||
+        location == '/onboarding' ||
+        location == '/login') {
       switch (role) {
         case UserRole.tutor:
           return '/tutor';
@@ -52,21 +37,24 @@ String? _getRedirectLocation(
           return '/parent';
       }
     }
+    return null;
   }
 
-  // For authenticated users without role
-  if (isAuth && role == null && location == '/signup') {
-    return '/select-role';
-  }
-
-  // For unauthenticated users
+  // For non-authenticated users
   if (!isAuth) {
-    // Allow public routes
-    if (isPublicRoute) return null;
-    // Redirect to onboarding for other routes
-    return '/onboarding';
+    // Protect dashboard routes
+    if (location.startsWith('/tutor') ||
+        location.startsWith('/student') ||
+        location.startsWith('/parent')) {
+      // If they already selected a role, send them to signup instead of onboarding
+      if (role != null) {
+        return '/signup';
+      }
+      return '/onboarding';
+    }
   }
 
+  // Let other routes pass through normally
   return null;
 }
 

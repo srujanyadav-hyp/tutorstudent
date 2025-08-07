@@ -64,44 +64,47 @@ class RoleSelectionScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Choose Your Role')),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          children: [
-            const Text(
-              'Select your role in TutorConnect',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 32),
-            _buildRoleCard(
-              context,
-              ref,
-              role: UserRole.tutor,
-              title: 'Tutor',
-              description: 'Share your knowledge and help students excel',
-              icon: Icons.school,
-            ),
-            const SizedBox(height: 16),
-            _buildRoleCard(
-              context,
-              ref,
-              role: UserRole.student,
-              title: 'Student',
-              description: 'Learn from expert tutors and achieve your goals',
-              icon: Icons.person,
-            ),
-            const SizedBox(height: 16),
-            _buildRoleCard(
-              context,
-              ref,
-              role: UserRole.parent,
-              title: 'Parent',
-              description: 'Monitor and support your child\'s education',
-              icon: Icons.family_restroom,
-            ),
-          ],
+    return WillPopScope(
+      onWillPop: () async => false,
+      child: Scaffold(
+        appBar: AppBar(title: const Text('Choose Your Role')),
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            children: [
+              const Text(
+                'Select your role in TutorConnect',
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 32),
+              _buildRoleCard(
+                context,
+                ref,
+                role: UserRole.tutor,
+                title: 'Tutor',
+                description: 'Share your knowledge and help students excel',
+                icon: Icons.school,
+              ),
+              const SizedBox(height: 16),
+              _buildRoleCard(
+                context,
+                ref,
+                role: UserRole.student,
+                title: 'Student',
+                description: 'Learn from expert tutors and achieve your goals',
+                icon: Icons.person,
+              ),
+              const SizedBox(height: 16),
+              _buildRoleCard(
+                context,
+                ref,
+                role: UserRole.parent,
+                title: 'Parent',
+                description: 'Monitor and support your child\'s education',
+                icon: Icons.family_restroom,
+              ),
+            ],
+          ),
         ),
       ),
     );
