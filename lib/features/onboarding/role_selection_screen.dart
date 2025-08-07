@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../models/user_role.dart';
-import '../../features/auth/controller/auth_controller.dart';
+import '../../providers/role_provider.dart';
+import '../../core/services/auth_service.dart';
 
 class RoleSelectionScreen extends ConsumerWidget {
   const RoleSelectionScreen({super.key});
@@ -11,9 +12,9 @@ class RoleSelectionScreen extends ConsumerWidget {
     // Store selected role in provider
     await ref.read(userRoleProvider.notifier).setRole(role);
 
-    // Navigate to auth screens
+    // After role selection, go to signup for new users
     if (context.mounted) {
-      context.go('/login');
+      context.go('/signup');
     }
   }
 

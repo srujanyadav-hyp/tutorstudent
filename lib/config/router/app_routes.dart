@@ -14,32 +14,60 @@ import '../../features/parent/parent_dashboard.dart';
 import '../../models/user_role.dart';
 import '../../providers/role_provider.dart';
 
+String? _getRedirectLocation(
+  String location,
+  SupabaseClient supabase,
+  UserRole? role,
+) {
+  final isAuth = supabase.auth.currentUser != null;
+
+  // Public routes that don't require auth
+  final isPublicRoute =
+      location == '/splash' ||
+      location == '/onboarding' ||
+      location == '/select-role' ||
+      location == '/signup' ||
+      location == '/login' ||
+      location == '/forgot-password';
+
+  // If not authenticated and trying to access a protected route
+  if (!isAuth && !isPublicRoute) {
+    return '/onboarding';
+  }
+
+  // If authenticated
+  if (isAuth) {
+    // For authenticated users, always redirect to their dashboard
+    final userRole = role;
+    if (userRole != null) {
+      switch (userRole) {
+        case UserRole.tutor:
+          return '/tutor';
+        case UserRole.student:
+          return '/student';
+        case UserRole.parent:
+          return '/parent';
+      }
+    }
+  }
+
+  return null;
+}
+
 final goRouterProvider = Provider<GoRouter>((ref) {
   final role = ref.watch(userRoleProvider);
   final supabase = Supabase.instance.client;
 
   return GoRouter(
+    redirect: (context, state) {
+      return _getRedirectLocation(state.uri.path, supabase, role);
+    },
     initialLocation: '/splash',
     routes: [
       // Initial Routes
       GoRoute(
         path: '/splash',
-        builder: (context, state) {
-          // If user is already logged in, redirect to dashboard
-          if (supabase.auth.currentUser != null) {
-            switch (role) {
-              case UserRole.tutor:
-                return const TutorDashboard();
-              case UserRole.student:
-                return const StudentDashboard();
-              case UserRole.parent:
-                return const ParentDashboard();
-              case null:
-                return const OnboardingScreen();
-            }
-          }
-          return const SplashScreen();
-        },
+        builder: (context, state) => const SplashScreen(),
       ),
       GoRoute(
         path: '/onboarding',
@@ -81,24 +109,8 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const ParentDashboard(),
       ),
 
-      // Root Route with Role-based Redirection
-      GoRoute(
-        path: '/',
-        builder: (context, state) {
-          if (role == null) {
-            return const LoginScreen();
-          }
-
-          switch (role) {
-            case UserRole.tutor:
-              return const TutorDashboard();
-            case UserRole.student:
-              return const StudentDashboard();
-            case UserRole.parent:
-              return const ParentDashboard();
-          }
-        },
-      ),
+      // Root Route
+      GoRoute(path: '/', redirect: (context, state) => '/splash'),
     ],
   );
 });
