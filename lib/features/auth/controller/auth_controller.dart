@@ -32,6 +32,11 @@ class AuthController extends StateNotifier<bool> {
   }) async {
     state = true;
     try {
+      // Validate input
+      if (fullName.trim().isEmpty) throw 'Full name is required';
+      if (email.trim().isEmpty) throw 'Email is required';
+      if (password.length < 6) throw 'Password must be at least 6 characters';
+
       final response = await _supabaseService.signUp(
         email: email,
         password: password,
@@ -42,7 +47,7 @@ class AuthController extends StateNotifier<bool> {
       );
 
       if (response.user == null) {
-        throw 'Signup failed';
+        throw 'Signup failed: No user data returned';
       }
 
       // Create role-specific profile

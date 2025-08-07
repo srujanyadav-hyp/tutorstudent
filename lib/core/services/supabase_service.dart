@@ -3,9 +3,23 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 class SupabaseService {
   final SupabaseClient client = Supabase.instance.client;
 
-  // User Operations
-  Future<User?> getCurrentUser() async {
-    return client.auth.currentUser;
+  // Profile Operations
+  Future<Map<String, dynamic>?> getUserProfile() async {
+    final user = client.auth.currentUser;
+    if (user == null) return null;
+
+    try {
+      final response = await client.from('user_profiles').select('''
+            *,
+            students!inner(*),
+            class_sessions!tutor_id(*),
+            assignments!tutor_id(*),
+            billing!parent_id(*)
+          ''').eq('id', user.id).single();
+      return response;
+    } catch (e) {
+      return null;
+    }
   }
 
   Future<void> signOut() async {
@@ -17,33 +31,57 @@ class SupabaseService {
     required String password,
     required String role,
     required String fullName,
-    String? phone,
-    String? profileImage,
   }) async {
-    final response = await client.auth.signUp(
-      email: email,
-      password: password,
-      data: {
-        'role': role,
-        'full_name': fullName,
-        'phone': phone,
-        'profile_image': profileImage,
-      },
-    );
+    try {
+      // First create the auth user
+      final response = await client.auth.signUp(
+        email: email,
+        password: password,
+      );
 
-    if (response.user != null) {
-      // Create user record in users table
-      await client.from('users').insert({
-        'id': response.user!.id,
-        'role': role,
-        'full_name': fullName,
-        'email': email,
-        'phone': phone,
-        'profile_image': profileImage,
-      });
+      if (response.user != null) {
+        try {
+          // Create user profile in user_profiles table
+          await client
+              .from('user_profiles')
+              .insert({
+                'id': response.user!.id,
+                'role': role,
+                'full_name': fullName,
+                'email': email,
+              })
+              .select()
+              .single();
+
+          // Create role-specific profile based on role
+          if (role == 'tutor') {
+            await client
+                .from('students')
+                .insert({
+                  'id': response.user!.id,
+                })
+                .select()
+                .single();
+          } else if (role == 'student') {
+            await client
+                .from('students')
+                .insert({
+                  'id': response.user!.id,
+                })
+                .select()
+                .single();
+          }
+        } catch (e) {
+          // If profile creation fails, delete the auth user
+          await client.auth.admin.deleteUser(response.user!.id);
+          throw 'Failed to create user profile: ${e.toString()}';
+        }
+      }
+
+      return response;
+    } catch (e) {
+      throw 'Signup failed: ${e.toString()}';
     }
-
-    return response;
   }
 
   Future<AuthResponse> signIn({
@@ -56,50 +94,23 @@ class SupabaseService {
     );
   }
 
-  // Tutor Operations
-  Future<Map<String, dynamic>> createTutorProfile({
-    required String userId,
-    String? expertise,
-    String? qualifications,
-    int? experienceYears,
-    double? pricing,
-  }) async {
-    try {
-      final response = await client
-          .from('tutors')
-          .insert({
-            'user_id': userId,
-            'expertise': expertise,
-            'qualifications': qualifications,
-            'experience_years': experienceYears,
-            'pricing': pricing,
-          })
-          .select()
-          .single();
-
-      return response;
-    } catch (e) {
-      throw 'Failed to create tutor profile: ${e.toString()}';
-    }
-  }
-
   // Student Operations
   Future<Map<String, dynamic>> createStudentProfile({
-    required String userId,
-    required String tutorId,
+    required String studentId,
+    String? tutorId,
     String? parentId,
     String? grade,
-    String? subjects,
+    String? classCode,
   }) async {
     try {
       final response = await client
           .from('students')
           .insert({
-            'user_id': userId,
+            'id': studentId,
             'tutor_id': tutorId,
             'parent_id': parentId,
             'grade': grade,
-            'subjects': subjects,
+            'class_code': classCode,
           })
           .select()
           .single();
@@ -110,48 +121,95 @@ class SupabaseService {
     }
   }
 
-  // Session Operations
-  Future<Map<String, dynamic>> createSession({
+  // Class Session Operations
+  Future<Map<String, dynamic>> createClassSession({
     required String tutorId,
-    required String studentId,
     required String title,
+    String? description,
     required DateTime scheduledAt,
-    required int duration,
-    String? meetingLink,
+    String? videoLink,
   }) async {
     try {
       final response = await client
-          .from('sessions')
+          .from('class_sessions')
           .insert({
             'tutor_id': tutorId,
-            'student_id': studentId,
             'title': title,
+            'description': description,
             'scheduled_at': scheduledAt.toIso8601String(),
-            'duration': duration,
-            'meeting_link': meetingLink,
-            'status': 'upcoming',
+            'video_link': videoLink,
           })
           .select()
           .single();
 
       return response;
     } catch (e) {
-      throw 'Failed to create session: ${e.toString()}';
+      throw 'Failed to create class session: ${e.toString()}';
     }
   }
 
-  Future<List<Map<String, dynamic>>> getUpcomingSessions(String userId) async {
+  // Assignment Operations
+  Future<Map<String, dynamic>> createAssignment({
+    required String tutorId,
+    required String title,
+    String? description,
+    DateTime? dueDate,
+  }) async {
     try {
       final response = await client
-          .from('sessions')
+          .from('assignments')
+          .insert({
+            'tutor_id': tutorId,
+            'title': title,
+            'description': description,
+            'due_date': dueDate?.toIso8601String(),
+          })
           .select()
-          .or('tutor_id.eq.$userId,student_id.eq.$userId')
-          .eq('status', 'upcoming')
-          .order('scheduled_at');
+          .single();
+
+      return response;
+    } catch (e) {
+      throw 'Failed to create assignment: ${e.toString()}';
+    }
+  }
+
+  Future<Map<String, dynamic>> submitAssignment({
+    required String assignmentId,
+    required String studentId,
+    required String submittedFile,
+    String? feedback,
+  }) async {
+    try {
+      final response = await client
+          .from('assignment_submissions')
+          .insert({
+            'assignment_id': assignmentId,
+            'student_id': studentId,
+            'submitted_file': submittedFile,
+            'feedback': feedback,
+          })
+          .select()
+          .single();
+
+      return response;
+    } catch (e) {
+      throw 'Failed to submit assignment: ${e.toString()}';
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getAssignments(String tutorId) async {
+    try {
+      final response = await client.from('assignments').select('''
+            *,
+            assignment_submissions (
+              *,
+              student:user_profiles!inner(*)
+            )
+          ''').eq('tutor_id', tutorId).order('due_date');
 
       return List<Map<String, dynamic>>.from(response);
     } catch (e) {
-      throw 'Failed to get upcoming sessions: ${e.toString()}';
+      throw 'Failed to get assignments: ${e.toString()}';
     }
   }
 }
