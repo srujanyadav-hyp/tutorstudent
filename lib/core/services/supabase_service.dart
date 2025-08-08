@@ -50,15 +50,21 @@ class SupabaseService {
 
       if (response.user != null) {
         try {
-          // Create user profile using the service role client (bypasses RLS)
+          // Step 1: Create user profile using the stored procedure
           await client.rpc('create_user_profile', params: {
             'user_id': response.user!.id,
             'user_role': role,
             'user_full_name': fullName,
             'user_email': email,
           });
+
+          // Step 2: If this is a student, create student profile
+          if (role == 'student') {
+            await client.rpc('create_student_profile', params: {
+              'p_user_id': response.user!.id,
+            });
+          }
         } catch (e) {
-          // If profile creation fails, just throw the error
           throw 'Failed to create user profile: ${e.toString()}';
         }
       }
@@ -91,37 +97,20 @@ class SupabaseService {
     String? classCode,
   }) async {
     try {
-      // First check if a student profile already exists
-      final existing = await client
-          .from('students')
-          .select()
-          .eq('user_id', studentId)
-          .maybeSingle();
+      final response = await client.rpc('create_student_profile', params: {
+        'p_user_id': studentId,
+        'p_tutor_id': tutorId,
+        'p_parent_id': parentId,
+        'p_grade': grade,
+        'p_class_code': classCode,
+      });
 
-      if (existing != null) {
-        return existing;
-      }
-
-      // Create new student profile with a new UUID
-      final response = await client
-          .from('students')
-          .insert({
-            'user_id': studentId, // Use user_id instead of id
-            'tutor_id': tutorId,
-            'parent_id': parentId,
-            'grade': grade,
-            'class_code': classCode,
-          })
-          .select()
-          .single();
-
-      return response;
+      return Map<String, dynamic>.from(response as Map);
     } catch (e) {
       throw 'Failed to create student profile: ${e.toString()}';
     }
-  }
+  } // Class Session Operations
 
-  // Class Session Operations
   Future<Map<String, dynamic>> createClassSession({
     required String tutorId,
     required String title,

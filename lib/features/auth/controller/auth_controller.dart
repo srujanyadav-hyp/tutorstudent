@@ -55,13 +55,6 @@ class AuthController extends StateNotifier<bool> {
         throw 'Signup failed: No user data returned';
       }
 
-      final userId = response.user!.id;
-
-      // Additional profile setup based on role
-      if (selectedRole == UserRole.student) {
-        await _supabaseService.createStudentProfile(studentId: userId);
-      }
-
       _showMessage(context, 'Signup successful! Please log in.');
       if (context.mounted) {
         context.go('/login');
