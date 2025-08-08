@@ -8,7 +8,8 @@ import '../../features/auth/screens/forget_password_screen.dart';
 import '../../features/onboarding/screens/splash_screen.dart';
 import '../../features/onboarding/screens/onboarding_screen.dart';
 import '../../features/onboarding/screens/role_selection_screen.dart';
-import '../../features/tutor/screens/tutor_dashboard.dart';
+import '../../features/profile/screens/profile_screen.dart';
+import '../../features/tutor/screens/tutor_layout.dart';
 import '../../features/student/screens/student_dashboard.dart';
 import '../../features/parent/screens/parent_dashboard.dart';
 import '../../models/user_role.dart';
@@ -114,7 +115,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       // Dashboard Routes
       GoRoute(
         path: '/tutor',
-        builder: (context, state) => const TutorDashboard(),
+        builder: (context, state) => const TutorLayout(),
       ),
       GoRoute(
         path: '/student',
@@ -123,6 +124,12 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/parent',
         builder: (context, state) => const ParentDashboard(),
+      ),
+
+      // Profile Route
+      GoRoute(
+        path: '/profile',
+        builder: (context, state) => const ProfileScreen(),
       ),
 
       // Root Route
