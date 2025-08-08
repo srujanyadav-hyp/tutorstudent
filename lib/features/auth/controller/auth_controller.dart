@@ -57,28 +57,14 @@ class AuthController extends StateNotifier<bool> {
 
       final userId = response.user!.id;
 
-      try {
-        // Additional profile setup based on role
-        switch (selectedRole) {
-          case UserRole.student:
-            await _supabaseService.createStudentProfile(studentId: userId);
-            break;
-          case UserRole.tutor:
-            // Tutors don't need an additional profile yet
-            break;
-          case UserRole.parent:
-            // Parents don't need an additional profile yet
-            break;
-        }
+      // Additional profile setup based on role
+      if (selectedRole == UserRole.student) {
+        await _supabaseService.createStudentProfile(studentId: userId);
+      }
 
-        _showMessage(context, 'Signup successful! Please log in.');
-        if (context.mounted) {
-          context.go('/login');
-        }
-      } catch (profileError) {
-        // If profile creation fails, delete the auth user
-        await _supabaseService.client.auth.admin.deleteUser(userId);
-        throw 'Failed to create user profile: ${profileError.toString()}';
+      _showMessage(context, 'Signup successful! Please log in.');
+      if (context.mounted) {
+        context.go('/login');
       }
     } catch (e) {
       _showMessage(context, ErrorHandler.getMessage(e));

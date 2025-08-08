@@ -1,227 +1,162 @@
 
--- Enable required extensions
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-
--- -----------------------------
--- USERS TABLE
--- -----------------------------
-CREATE TABLE IF NOT EXISTS users (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    role TEXT CHECK (role IN ('tutor', 'student', 'parent')),
-    full_name TEXT NOT NULL,
-    email TEXT UNIQUE,
-    phone TEXT,
-    profile_image TEXT,
-    created_at TIMESTAMP DEFAULT NOW()
+-- ============================
+-- Table: user_profiles
+-- ============================
+create table if not exists user_profiles (
+    id uuid primary key references auth.users(id) on delete cascade,
+    full_name text not null,
+    role text check (role in ('tutor', 'student', 'parent')) not null,
+    email text not null,
+    created_at timestamp with time zone default now()
 );
 
--- -----------------------------
--- TUTORS TABLE
--- -----------------------------
-CREATE TABLE IF NOT EXISTS tutors (
-    user_id UUID PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
-    expertise TEXT,
-    qualifications TEXT,
-    experience_years INTEGER,
-    pricing NUMERIC,
-    created_at TIMESTAMP DEFAULT NOW()
+-- Enable RLS
+alter table user_profiles enable row level security;
+
+-- Policies for user_profiles
+create policy "Allow user to access their profile"
+  on user_profiles for all
+  using (auth.uid() = id);
+
+-- ============================
+-- Table: students
+-- ============================
+create table if not exists students (
+    id uuid primary key references user_profiles(id) on delete cascade,
+    tutor_id uuid references user_profiles(id),
+    parent_id uuid references user_profiles(id),
+    grade text,
+    class_code text
 );
 
--- -----------------------------
--- STUDENTS TABLE
--- -----------------------------
-CREATE TABLE IF NOT EXISTS students (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    tutor_id UUID NOT NULL REFERENCES tutors(user_id) ON DELETE CASCADE,
-    grade TEXT,
-    subjects TEXT,
-    parent_id UUID REFERENCES users(id) ON DELETE SET NULL,
-    created_at TIMESTAMP DEFAULT NOW()
+alter table students enable row level security;
+
+create policy "Students can see/edit themselves"
+  on students for all
+  using (auth.uid() = id);
+
+-- ============================
+-- Table: assignments
+-- ============================
+create table if not exists assignments (
+    id uuid primary key default gen_random_uuid(),
+    tutor_id uuid references user_profiles(id),
+    title text not null,
+    description text,
+    due_date timestamp with time zone,
+    created_at timestamp with time zone default now()
 );
 
--- -----------------------------
--- ASSIGNMENTS TABLE
--- -----------------------------
-CREATE TABLE IF NOT EXISTS assignments (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    tutor_id UUID NOT NULL REFERENCES tutors(user_id) ON DELETE CASCADE,
-    title TEXT,
-    description TEXT,
-    due_date TIMESTAMP,
-    subject TEXT,
-    created_at TIMESTAMP DEFAULT NOW()
+alter table assignments enable row level security;
+
+create policy "Tutors can manage their assignments"
+  on assignments for all
+  using (auth.uid() = tutor_id);
+
+-- ============================
+-- Table: assignment_submissions
+-- ============================
+create table if not exists assignment_submissions (
+    id uuid primary key default gen_random_uuid(),
+    assignment_id uuid references assignments(id) on delete cascade,
+    student_id uuid references user_profiles(id),
+    submitted_file text,
+    submitted_at timestamp with time zone default now(),
+    grade text,
+    feedback text
 );
 
--- -----------------------------
--- ASSIGNMENT SUBMISSIONS TABLE
--- -----------------------------
-CREATE TABLE IF NOT EXISTS assignment_submissions (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    assignment_id UUID NOT NULL REFERENCES assignments(id) ON DELETE CASCADE,
-    student_id UUID NOT NULL REFERENCES students(id) ON DELETE CASCADE,
-    file_url TEXT,
-    feedback TEXT,
-    grade TEXT,
-    submitted_at TIMESTAMP DEFAULT NOW()
+alter table assignment_submissions enable row level security;
+
+create policy "Students can submit their own assignments"
+  on assignment_submissions for all
+  using (auth.uid() = student_id);
+
+-- ============================
+-- Table: class_sessions
+-- ============================
+create table if not exists class_sessions (
+    id uuid primary key default gen_random_uuid(),
+    tutor_id uuid references user_profiles(id),
+    title text,
+    description text,
+    scheduled_at timestamp with time zone,
+    video_link text,
+    created_at timestamp with time zone default now()
 );
 
--- -----------------------------
--- SESSIONS TABLE
--- -----------------------------
-CREATE TABLE IF NOT EXISTS sessions (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    tutor_id UUID NOT NULL REFERENCES tutors(user_id) ON DELETE CASCADE,
-    student_id UUID NOT NULL REFERENCES students(id) ON DELETE CASCADE,
-    title TEXT,
-    scheduled_at TIMESTAMP,
-    duration INTEGER,
-    meeting_link TEXT,
-    status TEXT CHECK (status IN ('upcoming', 'completed', 'cancelled')),
-    created_at TIMESTAMP DEFAULT NOW()
+alter table class_sessions enable row level security;
+
+create policy "Tutors can manage their sessions"
+  on class_sessions for all
+  using (auth.uid() = tutor_id);
+
+-- ============================
+-- Table: student_class_attendance
+-- ============================
+create table if not exists student_class_attendance (
+    id uuid primary key default gen_random_uuid(),
+    session_id uuid references class_sessions(id) on delete cascade,
+    student_id uuid references user_profiles(id),
+    joined_at timestamp with time zone default now()
 );
 
--- -----------------------------
--- ATTENDANCE TABLE
--- -----------------------------
-CREATE TABLE IF NOT EXISTS attendance (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    session_id UUID NOT NULL REFERENCES sessions(id) ON DELETE CASCADE,
-    student_id UUID NOT NULL REFERENCES students(id) ON DELETE CASCADE,
-    attended BOOLEAN,
-    timestamp TIMESTAMP DEFAULT NOW()
+alter table student_class_attendance enable row level security;
+
+create policy "Students can access their attendance"
+  on student_class_attendance for all
+  using (auth.uid() = student_id);
+
+-- ============================
+-- Table: messages
+-- ============================
+create table if not exists messages (
+    id uuid primary key default gen_random_uuid(),
+    sender_id uuid references user_profiles(id),
+    receiver_id uuid references user_profiles(id),
+    message text,
+    sent_at timestamp with time zone default now(),
+    seen boolean default false
 );
 
--- -----------------------------
--- PROGRESS REPORTS TABLE
--- -----------------------------
-CREATE TABLE IF NOT EXISTS progress_reports (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    student_id UUID NOT NULL REFERENCES students(id) ON DELETE CASCADE,
-    subject TEXT,
-    grade TEXT,
-    remarks TEXT,
-    recorded_at TIMESTAMP DEFAULT NOW()
+alter table messages enable row level security;
+
+create policy "Users can access their messages"
+  on messages for all
+  using (auth.uid() = sender_id or auth.uid() = receiver_id);
+
+-- ============================
+-- Table: billing
+-- ============================
+create table if not exists billing (
+    id uuid primary key default gen_random_uuid(),
+    parent_id uuid references user_profiles(id),
+    student_id uuid references user_profiles(id),
+    amount numeric,
+    due_date timestamp with time zone,
+    status text check (status in ('paid', 'pending', 'overdue')),
+    invoice_url text
 );
 
--- -----------------------------
--- MESSAGES TABLE
--- -----------------------------
-CREATE TABLE IF NOT EXISTS messages (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    sender_id UUID REFERENCES users(id) ON DELETE CASCADE,
-    receiver_id UUID REFERENCES users(id) ON DELETE CASCADE,
-    message TEXT,
-    file_url TEXT,
-    sent_at TIMESTAMP DEFAULT NOW()
+alter table billing enable row level security;
+
+create policy "Parents can see their own billing"
+  on billing for all
+  using (auth.uid() = parent_id);
+
+-- ============================
+-- Table: learning_insights (future)
+-- ============================
+create table if not exists learning_insights (
+    id uuid primary key default gen_random_uuid(),
+    student_id uuid references user_profiles(id),
+    insight_type text,
+    value jsonb,
+    created_at timestamp with time zone default now()
 );
 
--- -----------------------------
--- NOTIFICATIONS TABLE
--- -----------------------------
-CREATE TABLE IF NOT EXISTS notifications (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-    title TEXT,
-    body TEXT,
-    read BOOLEAN DEFAULT FALSE,
-    created_at TIMESTAMP DEFAULT NOW()
-);
+alter table learning_insights enable row level security;
 
--- -----------------------------
--- PAYMENTS TABLE
--- -----------------------------
-CREATE TABLE payments (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  student_id uuid REFERENCES users(id) ON DELETE CASCADE,
-  tutor_id uuid REFERENCES users(id) ON DELETE CASCADE,
-  session_id uuid REFERENCES sessions(id),
-  amount numeric(10,2) NOT NULL,
-  currency text DEFAULT 'INR',
-  status text CHECK (status IN ('pending', 'paid', 'failed')) DEFAULT 'pending',
-  payment_method text,
-  payment_date timestamp with time zone DEFAULT now(),
-  created_at timestamp with time zone DEFAULT now()
-);
-
-
--- -----------------------------
--- ENABLE RLS ON TABLES
--- -----------------------------
-ALTER TABLE users ENABLE ROW LEVEL SECURITY;
-ALTER TABLE tutors ENABLE ROW LEVEL SECURITY;
-ALTER TABLE students ENABLE ROW LEVEL SECURITY;
-ALTER TABLE assignments ENABLE ROW LEVEL SECURITY;
-ALTER TABLE assignment_submissions ENABLE ROW LEVEL SECURITY;
-ALTER TABLE sessions ENABLE ROW LEVEL SECURITY;
-ALTER TABLE attendance ENABLE ROW LEVEL SECURITY;
-ALTER TABLE progress_reports ENABLE ROW LEVEL SECURITY;
-ALTER TABLE messages ENABLE ROW LEVEL SECURITY;
-ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
-ALTER TABLE payments ENABLE ROW LEVEL SECURITY;
--- -----------------------------
--- RLS POLICIES
--- -----------------------------
-
--- USERS
--- Allow users to read and update their own profile
-CREATE POLICY "Users access own profile" ON users
-FOR SELECT, UPDATE USING (auth.uid() = id);
-
--- Allow insertion during signup
-CREATE POLICY "Allow insert during signup" ON users
-FOR INSERT WITH CHECK (auth.uid() = id);
-
--- TUTORS
-CREATE POLICY "Tutor manages own data" ON tutors
-FOR ALL USING (auth.uid() = user_id);
-
--- STUDENTS
-CREATE POLICY "Student manages own data" ON students
-FOR ALL USING (auth.uid() = user_id);
-
--- ASSIGNMENTS
-CREATE POLICY "Tutor manages own assignments" ON assignments
-FOR ALL USING (auth.uid() = tutor_id);
-
--- ASSIGNMENT SUBMISSIONS
-CREATE POLICY "Student accesses own submissions" ON assignment_submissions
-FOR SELECT, INSERT, UPDATE USING (auth.uid() = student_id);
-
--- SESSIONS
-CREATE POLICY "Tutor manages own sessions" ON sessions
-FOR ALL USING (auth.uid() = tutor_id);
-
--- ATTENDANCE
-CREATE POLICY "Tutor/Student view relevant attendance" ON attendance
-FOR SELECT USING (
-    EXISTS (
-        SELECT 1 FROM students s
-        WHERE s.id = attendance.student_id AND auth.uid() IN (s.user_id)
-    )
-);
-
--- PROGRESS REPORTS
-CREATE POLICY "Student sees their progress" ON progress_reports
-FOR SELECT USING (
-    EXISTS (
-        SELECT 1 FROM students s
-        WHERE s.id = progress_reports.student_id AND auth.uid() IN (s.user_id)
-    )
-);
-
--- MESSAGES
-CREATE POLICY "User sends/receives own messages" ON messages
-FOR SELECT, INSERT USING (
-    auth.uid() = sender_id OR auth.uid() = receiver_id
-);
-
--- PAYMENTS
-CREATE POLICY "User sees own payments" ON payments
-FOR SELECT USING (
-  auth.uid() = student_id OR auth.uid() = tutor_id
-);
-
--- NOTIFICATIONS
-CREATE POLICY "User accesses own notifications" ON notifications
-FOR SELECT, UPDATE USING (auth.uid() = user_id);
+create policy "Students can see their own insights"
+  on learning_insights for all
+  using (auth.uid() = student_id);

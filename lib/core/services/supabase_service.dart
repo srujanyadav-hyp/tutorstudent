@@ -35,38 +35,39 @@ class SupabaseService {
     String? profileImage,
   }) async {
     try {
-      // First create the auth user
+      // First create the auth user with data
+      final userAttributes = {
+        'full_name': fullName,
+        'role': role,
+        'phone': phone,
+      };
+
       final response = await client.auth.signUp(
         email: email,
         password: password,
+        data: userAttributes,
       );
 
       if (response.user != null) {
         try {
-          // Create user profile in user_profiles table
-          await client
-              .from('user_profiles')
-              .insert({
-                'id': response.user!.id,
-                'role': role,
-                'full_name': fullName,
-                'email': email,
-                'phone': phone,
-                'profile_image': profileImage,
-                'created_at': DateTime.now().toIso8601String(),
-                'updated_at': DateTime.now().toIso8601String(),
-              })
-              .select()
-              .single();
+          // Create user profile using the service role client (bypasses RLS)
+          await client.rpc('create_user_profile', params: {
+            'user_id': response.user!.id,
+            'user_role': role,
+            'user_full_name': fullName,
+            'user_email': email,
+          });
         } catch (e) {
-          // If profile creation fails, delete the auth user
-          await client.auth.admin.deleteUser(response.user!.id);
+          // If profile creation fails, just throw the error
           throw 'Failed to create user profile: ${e.toString()}';
         }
       }
 
       return response;
     } catch (e) {
+      if (e is AuthException) {
+        throw e.message;
+      }
       throw 'Signup failed: ${e.toString()}';
     }
   }
@@ -90,10 +91,22 @@ class SupabaseService {
     String? classCode,
   }) async {
     try {
+      // First check if a student profile already exists
+      final existing = await client
+          .from('students')
+          .select()
+          .eq('user_id', studentId)
+          .maybeSingle();
+
+      if (existing != null) {
+        return existing;
+      }
+
+      // Create new student profile with a new UUID
       final response = await client
           .from('students')
           .insert({
-            'id': studentId,
+            'user_id': studentId, // Use user_id instead of id
             'tutor_id': tutorId,
             'parent_id': parentId,
             'grade': grade,

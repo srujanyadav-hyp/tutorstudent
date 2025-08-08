@@ -14,16 +14,11 @@ class OnboardingData {
 
 class TutorOnboardingData extends OnboardingData {
   TutorOnboardingData({
-    required String title,
-    required String description,
-    required String imageAsset,
-    Map<String, dynamic>? additionalData,
-  }) : super(
-         title: title,
-         description: description,
-         imageAsset: imageAsset,
-         additionalData: additionalData,
-       );
+    required super.title,
+    required super.description,
+    required super.imageAsset,
+    super.additionalData,
+  });
 
   static List<OnboardingData> items = [
     OnboardingData(
@@ -49,16 +44,11 @@ class TutorOnboardingData extends OnboardingData {
 
 class StudentOnboardingData extends OnboardingData {
   StudentOnboardingData({
-    required String title,
-    required String description,
-    required String imageAsset,
-    Map<String, dynamic>? additionalData,
-  }) : super(
-         title: title,
-         description: description,
-         imageAsset: imageAsset,
-         additionalData: additionalData,
-       );
+    required super.title,
+    required super.description,
+    required super.imageAsset,
+    super.additionalData,
+  });
 
   static List<OnboardingData> items = [
     OnboardingData(
@@ -82,16 +72,11 @@ class StudentOnboardingData extends OnboardingData {
 
 class ParentOnboardingData extends OnboardingData {
   ParentOnboardingData({
-    required String title,
-    required String description,
-    required String imageAsset,
-    Map<String, dynamic>? additionalData,
-  }) : super(
-         title: title,
-         description: description,
-         imageAsset: imageAsset,
-         additionalData: additionalData,
-       );
+    required super.title,
+    required super.description,
+    required super.imageAsset,
+    super.additionalData,
+  });
 
   static List<OnboardingData> items = [
     OnboardingData(
