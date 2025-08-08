@@ -1,9 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../models/tutor_stats.dart';
+import '../../tutor/models/tutor_stats.dart';
 
-final tutorDashboardServiceProvider =
-    Provider((ref) => TutorDashboardService());
+final tutorDashboardServiceProvider = Provider(
+  (ref) => TutorDashboardService(),
+);
 
 class TutorDashboardService {
   final _supabase = Supabase.instance.client;
@@ -58,12 +59,12 @@ class TutorDashboardService {
 
           final index = 6 - daysAgo;
           if (index >= 0 && index < 7) {
-            sessionMetrics[index] = SessionMetric(
-                date: sessionMetrics[index].date,
-                sessionCount: (sessionMetrics[index].sessionCount + 1));
-            earningMetrics[index] = EarningMetric(
-                date: earningMetrics[index].date,
-                amount: (earningMetrics[index].amount + amount));
+            sessionMetrics[index] = sessionMetrics[index].copyWith(
+              sessionCount: sessionMetrics[index].sessionCount + 1,
+            );
+            earningMetrics[index] = earningMetrics[index].copyWith(
+              amount: earningMetrics[index].amount + amount,
+            );
           }
         }
       }
@@ -94,8 +95,10 @@ class TutorDashboardService {
       final totalReviews = reviews.length;
       final averageRating = totalReviews > 0
           ? reviews.fold<double>(
-                  0, (sum, review) => sum + (review['rating'] as num)) /
-              totalReviews
+                  0,
+                  (sum, review) => sum + (review['rating'] as num),
+                ) /
+                totalReviews
           : 0.0;
 
       return TutorStats(
