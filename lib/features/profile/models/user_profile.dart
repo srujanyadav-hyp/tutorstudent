@@ -49,17 +49,22 @@ class UserProfile {
 
   factory UserProfile.fromJson(Map<String, dynamic> json) {
     return UserProfile(
-      id: json['id'] as String,
-      fullName: json['full_name'] as String,
-      email: json['email'] as String,
-      role: json['role'] as String,
-      phone: json['phone']?.toString() ?? '',
-      bio: json['bio']?.toString() ?? '',
+      id: json['id']?.toString() ?? '',
+      fullName: json['full_name']?.toString() ?? '',
+      email: json['email']?.toString() ?? '',
+      role: json['role']?.toString() ?? '',
+      phone: json['phone']?.toString(),
+      bio: json['bio']?.toString(),
       profileImage: json['profile_image']?.toString(),
-      createdAt: DateTime.parse(json['created_at'] as String),
-      updatedAt: DateTime.parse(json['updated_at'] as String),
-      roleSpecificData:
-          (json['role_specific_data'] as Map<String, dynamic>?) ?? {},
+      createdAt: json['created_at'] != null
+          ? DateTime.parse(json['created_at'].toString())
+          : DateTime.now(),
+      updatedAt: json['updated_at'] != null
+          ? DateTime.parse(json['updated_at'].toString())
+          : DateTime.now(),
+      roleSpecificData: json['role_specific_data'] is Map
+          ? Map<String, dynamic>.from(json['role_specific_data'])
+          : null,
     );
   }
 

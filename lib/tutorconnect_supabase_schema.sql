@@ -7,7 +7,12 @@ create table if not exists user_profiles (
     full_name text not null,
     role text check (role in ('tutor', 'student', 'parent')) not null,
     email text not null,
-    created_at timestamp with time zone default now()
+    phone text,
+    bio text,
+    profile_image text,
+    role_specific_data jsonb,
+    created_at timestamp with time zone default now(),
+    updated_at timestamp with time zone default now()
 );
 
 -- Enable RLS

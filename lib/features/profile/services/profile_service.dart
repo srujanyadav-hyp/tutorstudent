@@ -9,17 +9,48 @@ class ProfileService {
     final user = _client.auth.currentUser;
     if (user == null) throw Exception('Not authenticated');
 
-    final response =
-        await _client.from('user_profiles').select().eq('id', user.id).single();
+    try {
+      // First try to get the existing profile
+      final response = await _client
+          .from('user_profiles')
+          .select()
+          .eq('id', user.id)
+          .maybeSingle();
 
-    // Ensure nullable fields are handled properly
-    return UserProfile.fromJson({
-      ...response,
-      'phone': response['phone'] ?? '',
-      'bio': response['bio'] ?? '',
-      'profile_image': response['profile_image'],
-      'role_specific_data': response['role_specific_data'] ?? {},
-    });
+      if (response == null) {
+        // If profile doesn't exist, create one with basic info
+        final userData = {
+          'id': user.id,
+          'full_name': user.userMetadata?['full_name'] ?? '',
+          'email': user.email ?? '',
+          'role': user.userMetadata?['role'] ?? 'student',
+          'created_at': DateTime.now().toIso8601String(),
+          'updated_at': DateTime.now().toIso8601String(),
+        };
+
+        // Insert the new profile
+        await _client.from('user_profiles').insert(userData);
+
+        // Fetch the newly created profile
+        final newResponse = await _client
+            .from('user_profiles')
+            .select()
+            .eq('id', user.id)
+            .single();
+
+        return UserProfile.fromJson(newResponse);
+      }
+
+      // Return existing profile
+      return UserProfile.fromJson(response);
+    } on PostgrestException catch (e) {
+      if (e.code == 'PGRST116') {
+        throw Exception('Profile not found or multiple profiles found');
+      }
+      throw Exception('Database error: ${e.message}');
+    } catch (e) {
+      throw Exception('Error loading profile: $e');
+    }
   }
 
   Future<String> uploadProfileImage(File imageFile) async {
@@ -41,15 +72,23 @@ class ProfileService {
     final user = _client.auth.currentUser;
     if (user == null) throw Exception('Not authenticated');
 
-    await _client.from('user_profiles').upsert({
-      'id': profile.id,
-      'full_name': profile.fullName,
-      'phone': profile.phone,
-      'bio': profile.bio,
-      'profile_image': profile.profileImage,
-      'role_specific_data': profile.roleSpecificData,
-      'updated_at': DateTime.now().toIso8601String(),
-    });
+    try {
+      await _client.from('user_profiles').upsert({
+        'id': profile.id,
+        'full_name': profile.fullName,
+        'email': profile.email,
+        'role': profile.role,
+        'phone': profile.phone,
+        'bio': profile.bio,
+        'profile_image': profile.profileImage,
+        'role_specific_data': profile.roleSpecificData,
+        'updated_at': DateTime.now().toIso8601String(),
+      });
+    } on PostgrestException catch (e) {
+      throw Exception('Failed to update profile: ${e.message}');
+    } catch (e) {
+      throw Exception('Error updating profile: $e');
+    }
   }
 
   Future<void> updatePassword(
