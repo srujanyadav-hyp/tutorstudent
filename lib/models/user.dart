@@ -6,9 +6,11 @@ part 'user.g.dart';
 @JsonSerializable()
 class User extends BaseModel {
   final String role;
+  @JsonKey(name: 'full_name')
   final String fullName;
   final String email;
   final String? phone;
+  @JsonKey(name: 'profile_image')
   final String? profileImage;
 
   User({
@@ -25,15 +27,4 @@ class User extends BaseModel {
 
   @override
   Map<String, dynamic> toJson() => _$UserToJson(this);
-
-  @override
-  Map<String, dynamic> toMap() => {
-    'id': id,
-    'role': role,
-    'full_name': fullName,
-    'email': email,
-    'phone': phone,
-    'profile_image': profileImage,
-    'created_at': createdAt.toIso8601String(),
-  };
 }

@@ -8,9 +8,9 @@ part of 'session.dart';
 
 Session _$SessionFromJson(Map<String, dynamic> json) => Session(
       id: json['id'] as String?,
-      createdAt: json['createdAt'] == null
+      createdAt: json['created_at'] == null
           ? null
-          : DateTime.parse(json['createdAt'] as String),
+          : DateTime.parse(json['created_at'] as String),
       tutorId: json['tutorId'] as String,
       studentId: json['studentId'] as String,
       title: json['title'] as String,
@@ -23,7 +23,7 @@ Session _$SessionFromJson(Map<String, dynamic> json) => Session(
 
 Map<String, dynamic> _$SessionToJson(Session instance) => <String, dynamic>{
       'id': instance.id,
-      'createdAt': instance.createdAt.toIso8601String(),
+      'created_at': instance.createdAt.toIso8601String(),
       'tutorId': instance.tutorId,
       'studentId': instance.studentId,
       'title': instance.title,

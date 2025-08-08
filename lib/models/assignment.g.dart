@@ -8,9 +8,9 @@ part of 'assignment.dart';
 
 Assignment _$AssignmentFromJson(Map<String, dynamic> json) => Assignment(
       id: json['id'] as String?,
-      createdAt: json['createdAt'] == null
+      createdAt: json['created_at'] == null
           ? null
-          : DateTime.parse(json['createdAt'] as String),
+          : DateTime.parse(json['created_at'] as String),
       tutorId: json['tutorId'] as String,
       title: json['title'] as String,
       description: json['description'] as String?,
@@ -23,7 +23,7 @@ Assignment _$AssignmentFromJson(Map<String, dynamic> json) => Assignment(
 Map<String, dynamic> _$AssignmentToJson(Assignment instance) =>
     <String, dynamic>{
       'id': instance.id,
-      'createdAt': instance.createdAt.toIso8601String(),
+      'created_at': instance.createdAt.toIso8601String(),
       'tutorId': instance.tutorId,
       'title': instance.title,
       'description': instance.description,

@@ -27,12 +27,8 @@ mixin _$Assignment {
   DateTime get dueDate => throw _privateConstructorUsedError;
   DateTime get createdAt => throw _privateConstructorUsedError;
 
-  /// Serializes this Assignment to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-
-  /// Create a copy of Assignment
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   $AssignmentCopyWith<Assignment> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -62,8 +58,6 @@ class _$AssignmentCopyWithImpl<$Res, $Val extends Assignment>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of Assignment
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -128,8 +122,6 @@ class __$$AssignmentImplCopyWithImpl<$Res>
       _$AssignmentImpl _value, $Res Function(_$AssignmentImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of Assignment
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -216,14 +208,12 @@ class _$AssignmentImpl implements _Assignment {
                 other.createdAt == createdAt));
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   int get hashCode => Object.hash(
       runtimeType, id, tutorId, title, description, dueDate, createdAt);
 
-  /// Create a copy of Assignment
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$AssignmentImplCopyWith<_$AssignmentImpl> get copyWith =>
@@ -261,11 +251,8 @@ abstract class _Assignment implements Assignment {
   DateTime get dueDate;
   @override
   DateTime get createdAt;
-
-  /// Create a copy of Assignment
-  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$AssignmentImplCopyWith<_$AssignmentImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -284,12 +271,8 @@ mixin _$AssignmentSubmission {
   String? get feedback => throw _privateConstructorUsedError;
   DateTime get submittedAt => throw _privateConstructorUsedError;
 
-  /// Serializes this AssignmentSubmission to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-
-  /// Create a copy of AssignmentSubmission
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   $AssignmentSubmissionCopyWith<AssignmentSubmission> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -321,8 +304,6 @@ class _$AssignmentSubmissionCopyWithImpl<$Res,
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of AssignmentSubmission
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -393,8 +374,6 @@ class __$$AssignmentSubmissionImplCopyWithImpl<$Res>
       $Res Function(_$AssignmentSubmissionImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of AssignmentSubmission
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -493,14 +472,12 @@ class _$AssignmentSubmissionImpl implements _AssignmentSubmission {
                 other.submittedAt == submittedAt));
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   int get hashCode => Object.hash(runtimeType, id, assignmentId, studentId,
       submissionFile, grade, feedback, submittedAt);
 
-  /// Create a copy of AssignmentSubmission
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$AssignmentSubmissionImplCopyWith<_$AssignmentSubmissionImpl>
@@ -543,11 +520,8 @@ abstract class _AssignmentSubmission implements AssignmentSubmission {
   String? get feedback;
   @override
   DateTime get submittedAt;
-
-  /// Create a copy of AssignmentSubmission
-  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$AssignmentSubmissionImplCopyWith<_$AssignmentSubmissionImpl>
       get copyWith => throw _privateConstructorUsedError;
 }

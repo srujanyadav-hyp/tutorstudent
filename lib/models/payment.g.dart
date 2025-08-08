@@ -8,9 +8,9 @@ part of 'payment.dart';
 
 Payment _$PaymentFromJson(Map<String, dynamic> json) => Payment(
       id: json['id'] as String?,
-      createdAt: json['createdAt'] == null
+      createdAt: json['created_at'] == null
           ? null
-          : DateTime.parse(json['createdAt'] as String),
+          : DateTime.parse(json['created_at'] as String),
       studentId: json['studentId'] as String,
       tutorId: json['tutorId'] as String,
       sessionId: json['sessionId'] as String?,
@@ -24,7 +24,7 @@ Payment _$PaymentFromJson(Map<String, dynamic> json) => Payment(
 
 Map<String, dynamic> _$PaymentToJson(Payment instance) => <String, dynamic>{
       'id': instance.id,
-      'createdAt': instance.createdAt.toIso8601String(),
+      'created_at': instance.createdAt.toIso8601String(),
       'studentId': instance.studentId,
       'tutorId': instance.tutorId,
       'sessionId': instance.sessionId,

@@ -10,9 +10,9 @@ AssignmentSubmission _$AssignmentSubmissionFromJson(
         Map<String, dynamic> json) =>
     AssignmentSubmission(
       id: json['id'] as String?,
-      createdAt: json['createdAt'] == null
+      createdAt: json['created_at'] == null
           ? null
-          : DateTime.parse(json['createdAt'] as String),
+          : DateTime.parse(json['created_at'] as String),
       assignmentId: json['assignmentId'] as String,
       studentId: json['studentId'] as String,
       fileUrl: json['fileUrl'] as String?,
@@ -24,7 +24,7 @@ Map<String, dynamic> _$AssignmentSubmissionToJson(
         AssignmentSubmission instance) =>
     <String, dynamic>{
       'id': instance.id,
-      'createdAt': instance.createdAt.toIso8601String(),
+      'created_at': instance.createdAt.toIso8601String(),
       'assignmentId': instance.assignmentId,
       'studentId': instance.studentId,
       'fileUrl': instance.fileUrl,

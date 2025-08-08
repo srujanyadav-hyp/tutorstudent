@@ -2,31 +2,25 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import '../models/tutor_stats.dart';
+import '../../tutor/models/tutor_stats.dart';
 import '../providers/tutor_dashboard_provider.dart';
 
 class TutorDashboardView extends ConsumerWidget {
   final String tutorId;
 
-  const TutorDashboardView({
-    Key? key,
-    required this.tutorId,
-  }) : super(key: key);
+  const TutorDashboardView({Key? key, required this.tutorId}) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final statsAsync = ref.watch(tutorStatsProvider(tutorId));
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Dashboard'),
-      ),
+      appBar: AppBar(title: const Text('Dashboard')),
       body: statsAsync.when(
         data: (stats) => _DashboardContent(stats: stats),
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => Center(
-          child: Text('Error: \${error.toString()}'),
-        ),
+        error: (error, stack) =>
+            Center(child: Text('Error: \${error.toString()}')),
       ),
     );
   }
@@ -35,10 +29,7 @@ class TutorDashboardView extends ConsumerWidget {
 class _DashboardContent extends StatelessWidget {
   final TutorStats stats;
 
-  const _DashboardContent({
-    Key? key,
-    required this.stats,
-  }) : super(key: key);
+  const _DashboardContent({Key? key, required this.stats}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -60,7 +51,7 @@ class _DashboardContent extends StatelessWidget {
   Widget _buildStatCards(BuildContext context) {
     final numberFormat = NumberFormat.currency(symbol: '\$');
     return GridView.count(
-      crossAxisCount: 2,
+      crossAxisCount: 3,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       mainAxisSpacing: 16,
@@ -72,19 +63,30 @@ class _DashboardContent extends StatelessWidget {
           icon: Icons.calendar_today,
         ),
         _StatCard(
-          title: 'Total Earnings',
-          value: numberFormat.format(stats.totalEarnings),
+          title: 'Monthly Earnings',
+          value: numberFormat.format(stats.monthlyEarnings),
           icon: Icons.attach_money,
+        ),
+        _StatCard(
+          title: 'Total Students',
+          value: stats.totalStudents.toString(),
+          icon: Icons.people,
         ),
         _StatCard(
           title: 'Upcoming Sessions',
           value: stats.upcomingSessions.toString(),
-          icon: Icons.event_upcoming,
+          icon: Icons.event,
         ),
         _StatCard(
-          title: 'Active Students',
-          value: stats.activeStudents.toString(),
-          icon: Icons.people,
+          title: 'Total Earnings',
+          value: numberFormat.format(stats.totalEarnings),
+          icon: Icons.monetization_on,
+        ),
+        _StatCard(
+          title: 'Rating',
+          value:
+              '${stats.averageRating.toStringAsFixed(1)} (${stats.totalReviews})',
+          icon: Icons.star,
         ),
       ],
     );
@@ -99,10 +101,7 @@ class _DashboardContent extends StatelessWidget {
           children: [
             const Text(
               'Sessions This Week',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             SizedBox(
@@ -110,7 +109,8 @@ class _DashboardContent extends StatelessWidget {
               child: BarChart(
                 BarChartData(
                   alignment: BarChartAlignment.spaceAround,
-                  maxY: stats.sessionMetrics
+                  maxY:
+                      stats.sessionMetrics
                           .map((m) => m.sessionCount.toDouble())
                           .reduce((a, b) => a > b ? a : b) *
                       1.2,
@@ -141,9 +141,7 @@ class _DashboardContent extends StatelessWidget {
                       sideTitles: SideTitles(showTitles: false),
                     ),
                   ),
-                  borderData: FlBorderData(
-                    show: false,
-                  ),
+                  borderData: FlBorderData(show: false),
                   barGroups: stats.sessionMetrics
                       .asMap()
                       .entries
@@ -179,10 +177,7 @@ class _DashboardContent extends StatelessWidget {
           children: [
             const Text(
               'Earnings This Week',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             SizedBox(
@@ -190,7 +185,8 @@ class _DashboardContent extends StatelessWidget {
               child: LineChart(
                 LineChartData(
                   minY: 0,
-                  maxY: stats.earningMetrics
+                  maxY:
+                      stats.earningMetrics
                           .map((m) => m.amount)
                           .reduce((a, b) => a > b ? a : b) *
                       1.2,
@@ -288,18 +284,11 @@ class _StatCard extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              icon,
-              size: 32,
-              color: Theme.of(context).primaryColor,
-            ),
+            Icon(icon, size: 32, color: Theme.of(context).primaryColor),
             const SizedBox(height: 8),
             Text(
               value,
-              style: const TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 4),
             Text(

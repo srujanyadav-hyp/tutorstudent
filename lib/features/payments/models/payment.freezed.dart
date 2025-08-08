@@ -28,12 +28,8 @@ mixin _$PaymentTransaction {
   String get transactionId => throw _privateConstructorUsedError;
   DateTime get createdAt => throw _privateConstructorUsedError;
 
-  /// Serializes this PaymentTransaction to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-
-  /// Create a copy of PaymentTransaction
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   $PaymentTransactionCopyWith<PaymentTransaction> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -64,8 +60,6 @@ class _$PaymentTransactionCopyWithImpl<$Res, $Val extends PaymentTransaction>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of PaymentTransaction
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -136,8 +130,6 @@ class __$$PaymentTransactionImplCopyWithImpl<$Res>
       $Res Function(_$PaymentTransactionImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of PaymentTransaction
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -235,14 +227,12 @@ class _$PaymentTransactionImpl implements _PaymentTransaction {
                 other.createdAt == createdAt));
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   int get hashCode => Object.hash(runtimeType, id, bookingId, amount, status,
       paymentMethod, transactionId, createdAt);
 
-  /// Create a copy of PaymentTransaction
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$PaymentTransactionImplCopyWith<_$PaymentTransactionImpl> get copyWith =>
@@ -284,11 +274,8 @@ abstract class _PaymentTransaction implements PaymentTransaction {
   String get transactionId;
   @override
   DateTime get createdAt;
-
-  /// Create a copy of PaymentTransaction
-  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$PaymentTransactionImplCopyWith<_$PaymentTransactionImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -307,12 +294,8 @@ mixin _$WithdrawalRequest {
   DateTime get createdAt => throw _privateConstructorUsedError;
   DateTime? get processedAt => throw _privateConstructorUsedError;
 
-  /// Serializes this WithdrawalRequest to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-
-  /// Create a copy of WithdrawalRequest
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   $WithdrawalRequestCopyWith<WithdrawalRequest> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -343,8 +326,6 @@ class _$WithdrawalRequestCopyWithImpl<$Res, $Val extends WithdrawalRequest>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of WithdrawalRequest
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -415,8 +396,6 @@ class __$$WithdrawalRequestImplCopyWithImpl<$Res>
       $Res Function(_$WithdrawalRequestImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of WithdrawalRequest
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -520,7 +499,7 @@ class _$WithdrawalRequestImpl implements _WithdrawalRequest {
                 other.processedAt == processedAt));
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   int get hashCode => Object.hash(
       runtimeType,
@@ -532,9 +511,7 @@ class _$WithdrawalRequestImpl implements _WithdrawalRequest {
       createdAt,
       processedAt);
 
-  /// Create a copy of WithdrawalRequest
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$WithdrawalRequestImplCopyWith<_$WithdrawalRequestImpl> get copyWith =>
@@ -576,11 +553,8 @@ abstract class _WithdrawalRequest implements WithdrawalRequest {
   DateTime get createdAt;
   @override
   DateTime? get processedAt;
-
-  /// Create a copy of WithdrawalRequest
-  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$WithdrawalRequestImplCopyWith<_$WithdrawalRequestImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

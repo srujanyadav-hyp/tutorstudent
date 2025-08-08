@@ -5,9 +5,11 @@ part 'tutor.g.dart';
 
 @JsonSerializable()
 class Tutor extends BaseModel {
+  @JsonKey(name: 'user_id')
   final String userId;
   final String? expertise;
   final String? qualifications;
+  @JsonKey(name: 'experience_years')
   final int? experienceYears;
   final double? pricing;
 
@@ -25,14 +27,4 @@ class Tutor extends BaseModel {
 
   @override
   Map<String, dynamic> toJson() => _$TutorToJson(this);
-
-  @override
-  Map<String, dynamic> toMap() => {
-    'user_id': userId,
-    'expertise': expertise,
-    'qualifications': qualifications,
-    'experience_years': experienceYears,
-    'pricing': pricing,
-    'created_at': createdAt.toIso8601String(),
-  };
 }

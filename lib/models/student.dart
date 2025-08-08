@@ -5,8 +5,11 @@ part 'student.g.dart';
 
 @JsonSerializable()
 class Student extends BaseModel {
+  @JsonKey(name: 'user_id')
   final String userId;
+  @JsonKey(name: 'tutor_id')
   final String tutorId;
+  @JsonKey(name: 'parent_id')
   final String? parentId;
   final String? grade;
   final String? subjects;
@@ -26,14 +29,4 @@ class Student extends BaseModel {
 
   @override
   Map<String, dynamic> toJson() => _$StudentToJson(this);
-
-  @override
-  Map<String, dynamic> toMap() => {
-    'user_id': userId,
-    'tutor_id': tutorId,
-    'parent_id': parentId,
-    'grade': grade,
-    'subjects': subjects,
-    'created_at': createdAt.toIso8601String(),
-  };
 }
