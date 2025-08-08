@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../widgets/auth_form_card.dart';
+import '../widgets/custom_text_form_field.dart';
 import '../../../core/utils/validators.dart';
 import '../../../providers/role_provider.dart';
 import '../controller/auth_controller.dart';
@@ -73,9 +74,9 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
             context.go('/login');
           },
           children: [
-            TextFormField(
+            CustomTextFormField(
               controller: fullNameController,
-              decoration: const InputDecoration(labelText: 'Full Name'),
+              label: 'Full Name',
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Please enter your full name';
@@ -83,23 +84,23 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                 return null;
               },
             ),
-            TextFormField(
+            CustomTextFormField(
               controller: emailController,
-              decoration: const InputDecoration(labelText: 'Email'),
+              label: 'Email',
               keyboardType: TextInputType.emailAddress,
               validator: Validators.email,
             ),
-            TextFormField(
+            CustomTextFormField(
               controller: phoneController,
-              decoration: const InputDecoration(
-                  labelText: 'Phone (Optional)', hintText: 'e.g., +1234567890'),
+              label: 'Phone (Optional)',
+              hint: 'e.g., +1234567890',
               keyboardType: TextInputType.phone,
               validator: Validators.phone,
             ),
-            TextFormField(
+            CustomTextFormField(
               controller: passwordController,
-              decoration: const InputDecoration(labelText: 'Password'),
-              obscureText: true,
+              label: 'Password',
+              isPassword: true,
               validator: Validators.password,
             ),
           ],

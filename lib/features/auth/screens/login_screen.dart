@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../widgets/auth_form_card.dart';
+import '../widgets/custom_text_form_field.dart';
 import '../../../core/utils/validators.dart';
 import '../controller/auth_controller.dart';
 
@@ -32,9 +33,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ? null
               : () {
                   if (_formKey.currentState!.validate()) {
-                    ref
-                        .read(authControllerProvider.notifier)
-                        .login(
+                    ref.read(authControllerProvider.notifier).login(
                           context: context,
                           email: emailController.text,
                           password: passwordController.text,
@@ -49,15 +48,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             context.go('/forgot-password');
           },
           children: [
-            TextFormField(
+            CustomTextFormField(
               controller: emailController,
-              decoration: const InputDecoration(labelText: 'Email'),
+              label: 'Email',
+              hint: 'Enter your email address',
+              keyboardType: TextInputType.emailAddress,
               validator: Validators.email,
             ),
-            TextFormField(
+            CustomTextFormField(
               controller: passwordController,
-              decoration: const InputDecoration(labelText: 'Password'),
-              obscureText: true,
+              label: 'Password',
+              hint: 'Enter your password',
+              isPassword: true,
               validator: Validators.password,
             ),
           ],

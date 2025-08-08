@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../widgets/auth_form_card.dart';
+import '../widgets/custom_text_form_field.dart';
 import '../../../core/utils/validators.dart';
 import '../controller/auth_controller.dart';
 
@@ -34,18 +35,18 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
               ? null
               : () {
                   if (_formKey.currentState!.validate()) {
-                    ref
-                        .read(authControllerProvider.notifier)
-                        .resetPassword(
+                    ref.read(authControllerProvider.notifier).resetPassword(
                           context: context,
                           email: emailController.text,
                         );
                   }
                 },
           children: [
-            TextFormField(
+            CustomTextFormField(
               controller: emailController,
-              decoration: const InputDecoration(labelText: 'Email'),
+              label: 'Email',
+              hint: 'Enter your email address',
+              keyboardType: TextInputType.emailAddress,
               validator: Validators.email,
             ),
           ],
