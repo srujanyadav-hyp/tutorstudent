@@ -12,6 +12,8 @@ import '../../features/profile/screens/profile_screen.dart';
 import '../../features/tutor/screens/tutor_layout.dart';
 import '../../features/student/screens/student_dashboard.dart';
 import '../../features/parent/screens/parent_dashboard.dart';
+import '../../features/tutor/models/student_management.dart';
+import '../../features/tutor/screens/student_detail_screen.dart';
 import '../../models/user_role.dart';
 import '../../providers/role_provider.dart';
 
@@ -116,6 +118,18 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/tutor',
         builder: (context, state) => const TutorLayout(),
+        routes: [
+          GoRoute(
+            path: 'student/:id',
+            builder: (context, state) {
+              final studentId = state.pathParameters['id']!;
+              return StudentDetailScreen(
+                studentId: studentId,
+                student: state.extra as ManagedStudent,
+              );
+            },
+          ),
+        ],
       ),
       GoRoute(
         path: '/student',
