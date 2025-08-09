@@ -8,7 +8,7 @@ class ParentDashboardService {
     try {
       // Get total number of linked students
       final students = await _supabase
-          .from('parent_student_links')
+          .from('students')
           .select()
           .eq('parent_id', parentId);
       final studentsCount = students.length;
@@ -41,50 +41,61 @@ class ParentDashboardService {
         recentActivities: recentActivities.cast<Map<String, dynamic>>(),
       );
     } catch (e) {
-      throw 'Failed to get parent stats: ${e.toString()}';
+      if (e is PostgrestException) {
+        throw 'Database error: ${e.message}';
+      } else {
+        throw 'Failed to get parent stats: ${e.toString()}';
+      }
     }
   }
 
   Stream<List<Map<String, dynamic>>> streamLinkedStudents(String parentId) {
     return _supabase
-        .from('parent_student_links')
+        .from('students')
         .stream(primaryKey: ['id'])
         .eq('parent_id', parentId)
         .map(
-          (records) => records.map((record) {
-            final studentId = record['student_id'] as String;
+          (students) => students.map((student) {
+            final userId = student['id'] as String;
             return {
-              'id': studentId,
+              'id': student['id'],
               'student': _supabase
                   .from('user_profiles')
                   .select()
-                  .eq('id', studentId)
+                  .eq('id', userId)
                   .single(),
             };
           }).toList(),
         );
   }
 
-  Future<void> linkStudent(String parentId, String studentId) async {
+  Future<void> linkStudent(String parentId, String studentEmail) async {
     try {
-      await _supabase.from('parent_student_links').insert({
-        'parent_id': parentId,
-        'student_id': studentId,
-      });
+      await _supabase.rpc(
+        'link_student',
+        params: {'parent_uuid': parentId, 'student_email': studentEmail},
+      );
     } catch (e) {
-      throw 'Failed to link student: ${e.toString()}';
+      if (e is PostgrestException) {
+        throw e.message;
+      } else {
+        throw 'Failed to link student: ${e.toString()}';
+      }
     }
   }
 
   Future<void> unlinkStudent(String parentId, String studentId) async {
     try {
-      await _supabase
-          .from('parent_student_links')
-          .delete()
-          .eq('parent_id', parentId)
-          .eq('student_id', studentId);
+      await _supabase.rpc(
+        'unlink_student',
+        params: {'parent_uuid': parentId, 'student_uuid': studentId},
+      );
     } catch (e) {
-      throw 'Failed to unlink student: ${e.toString()}';
+      if (e is PostgrestException) {
+        throw e.message;
+      } else {
+        throw 'Failed to unlink student: ${e.toString()}';
+      }
     }
   }
 }

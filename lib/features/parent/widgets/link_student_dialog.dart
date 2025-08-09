@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:tutorconnect/core/services/supabase_service.dart';
+import '../providers/parent_dashboard_provider.dart';
 
 class LinkStudentDialog extends ConsumerStatefulWidget {
-  const LinkStudentDialog({super.key});
+  final String parentId;
+
+  const LinkStudentDialog({super.key, required this.parentId});
 
   @override
   ConsumerState<LinkStudentDialog> createState() => _LinkStudentDialogState();
@@ -30,20 +32,14 @@ class _LinkStudentDialogState extends ConsumerState<LinkStudentDialog> {
     });
 
     try {
-      final supabase = ref.read(supabaseServiceProvider);
-
-      // Find student by email
-      final response = await supabase
-          .from('profiles')
-          .select()
-          .eq('email', _studentEmailController.text.trim())
-          .eq('role', 'student')
-          .single();
+      await ref
+          .read(parentDashboardServiceProvider)
+          .linkStudent(widget.parentId, _studentEmailController.text.trim());
 
       if (!mounted) return;
 
-      // Return the student ID to parent dashboard
-      Navigator.of(context).pop(response['id'] as String);
+      // Close the dialog after successful linking
+      Navigator.of(context).pop(true);
     } catch (e) {
       setState(() {
         _error = 'Student not found with this email';

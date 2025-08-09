@@ -1,56 +1,113 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:tutorconnect/core/services/supabase_service.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-final studentsServiceProvider = Provider((ref) => StudentsService(ref));
+class StudentNotFoundError implements Exception {
+  final String message;
+  StudentNotFoundError(this.message);
+}
+
+class DuplicateLinkError implements Exception {
+  final String message;
+  DuplicateLinkError(this.message);
+}
+
+final studentsServiceProvider = Provider((ref) => const StudentsService());
 
 class StudentsService {
-  final Ref _ref;
-
-  StudentsService(this._ref);
+  const StudentsService();
 
   Future<List<Map<String, dynamic>>> getLinkedStudents() async {
-    final supabase = _ref.read(supabaseServiceProvider);
-    final user = supabase.auth.currentUser;
-    if (user == null) throw Exception('Not authenticated');
+    try {
+      final supabase = Supabase.instance.client;
+      final user = supabase.auth.currentUser;
+      if (user == null) throw Exception('Not authenticated');
 
-    final response = await supabase
-        .from('parent_students')
-        .select('''
-        id,
-        student:student_id (
+      final response = await supabase
+          .from('parent_students')
+          .select('''
           id,
-          user_id,
-          full_name,
-          grade,
-          profile_image,
-          created_at
-        )
-      ''')
-        .eq('parent_id', user.id);
+          student:student_id (
+            id,
+            user_id,
+            full_name,
+            grade,
+            profile_image,
+            created_at
+          )
+        ''')
+          .eq('parent_id', user.id);
 
-    return response;
+      return List<Map<String, dynamic>>.from(response);
+    } catch (e) {
+      throw Exception('Failed to fetch linked students: ${e.toString()}');
+    }
   }
 
-  Future<void> linkStudent(String studentId) async {
-    final supabase = _ref.read(supabaseServiceProvider);
-    final user = supabase.auth.currentUser;
-    if (user == null) throw Exception('Not authenticated');
+  Future<String> linkStudent(String studentId) async {
+    try {
+      final supabase = Supabase.instance.client;
+      final user = supabase.auth.currentUser;
+      if (user == null) throw Exception('Not authenticated');
 
-    await supabase.from('parent_students').insert({
-      'parent_id': user.id,
-      'student_id': studentId,
-    });
+      // Check if student exists
+      final studentExists = await supabase
+          .from('user_profiles')
+          .select('id')
+          .eq('id', studentId)
+          .eq('role', 'student')
+          .maybeSingle();
+
+      if (studentExists == null) {
+        throw StudentNotFoundError('Student not found');
+      }
+
+      // Check for existing link
+      final existingLink = await supabase
+          .from('parent_students')
+          .select('id')
+          .eq('parent_id', user.id)
+          .eq('student_id', studentId)
+          .maybeSingle();
+
+      if (existingLink != null) {
+        throw DuplicateLinkError('Student is already linked to this parent');
+      }
+
+      // Create the link
+      final response = await supabase
+          .from('parent_students')
+          .insert({'parent_id': user.id, 'student_id': studentId})
+          .select('id')
+          .single();
+
+      return response['id'] as String;
+    } catch (e) {
+      if (e is StudentNotFoundError || e is DuplicateLinkError) {
+        throw e;
+      }
+      throw Exception('Failed to link student: ${e.toString()}');
+    }
   }
 
   Future<void> unlinkStudent(String studentId) async {
-    final supabase = _ref.read(supabaseServiceProvider);
-    final user = supabase.auth.currentUser;
-    if (user == null) throw Exception('Not authenticated');
+    try {
+      final supabase = Supabase.instance.client;
+      final user = supabase.auth.currentUser;
+      if (user == null) throw Exception('Not authenticated');
 
-    await supabase
-        .from('parent_students')
-        .delete()
-        .eq('parent_id', user.id)
-        .eq('student_id', studentId);
+      final result = await supabase
+          .from('parent_students')
+          .delete()
+          .eq('parent_id', user.id)
+          .eq('student_id', studentId)
+          .select('id')
+          .maybeSingle();
+
+      if (result == null) {
+        throw Exception('Student was not linked to this parent');
+      }
+    } catch (e) {
+      throw Exception('Failed to unlink student: ${e.toString()}');
+    }
   }
 }
