@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/student_dashboard_stats.dart';
 import '../models/student_profile.dart';
-import '../models/chat_message.dart';
+import '../../messaging/models/chat_message.dart';
 
 final studentServiceProvider = Provider((ref) => StudentService());
 
@@ -358,11 +358,10 @@ class StudentService {
         'id': DateTime.now().millisecondsSinceEpoch.toString(),
         'sender_id': studentId,
         'receiver_id': tutorId,
-        'content': content,
-        'timestamp': DateTime.now().toIso8601String(),
+        'message': content,
+        'created_at': DateTime.now().toIso8601String(),
         'is_read': false,
         'attachment_url': attachmentUrl,
-        'attachment_type': attachmentType,
       });
     } catch (e) {
       throw 'Failed to send message: ${e.toString()}';
@@ -386,7 +385,7 @@ class StudentService {
                     (record['sender_id'] == tutorId ||
                         record['receiver_id'] == tutorId),
               )
-              .map((json) => ChatMessage.fromJson(json as Map<String, dynamic>))
+              .map((json) => ChatMessage.fromJson(json))
               .toList();
         });
   }
