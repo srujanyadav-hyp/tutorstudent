@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
+import '../../../core/providers/supabase_provider.dart';
 import '../providers/profile_provider.dart';
 import '../widgets/profile_image_picker.dart';
 import '../widgets/profile_info_form.dart';
@@ -64,7 +65,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   Future<void> _saveProfile() async {
     if (_formKey.currentState?.validate() ?? false) {
       try {
-        await ref.read(profileProvider.notifier).updateProfile(
+        await ref
+            .read(profileProvider.notifier)
+            .updateProfile(
               fullName: _nameController.text,
               phone: _phoneController.text,
               bio: _bioController.text,
@@ -96,6 +99,32 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           IconButton(
             icon: Icon(_isEditing ? Icons.close : Icons.edit),
             onPressed: _toggleEdit,
+          ),
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: const Text('Logout'),
+                  content: const Text('Are you sure you want to logout?'),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('CANCEL'),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        ref.read(supabaseServiceProvider).client.auth.signOut();
+                      },
+                      style: TextButton.styleFrom(foregroundColor: Colors.red),
+                      child: const Text('LOGOUT'),
+                    ),
+                  ],
+                ),
+              );
+            },
           ),
         ],
       ),
@@ -132,9 +161,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             size: 50,
           ),
         ),
-        error: (error, stack) => Center(
-          child: Text('Error loading profile: $error'),
-        ),
+        error: (error, stack) =>
+            Center(child: Text('Error loading profile: $error')),
       ),
       floatingActionButton: _isEditing
           ? FloatingActionButton(

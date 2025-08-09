@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../models/student_management.dart';
 import '../providers/student_management_provider.dart';
+import '../widgets/edit_student_dialog.dart';
 
 class StudentDetailScreen extends ConsumerWidget {
   final String studentId;

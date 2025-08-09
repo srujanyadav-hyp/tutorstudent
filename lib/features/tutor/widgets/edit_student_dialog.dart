@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../providers/auth_provider.dart';
+import '../../../core/providers/supabase_provider.dart';
 import '../models/student_management.dart';
 import '../providers/student_management_provider.dart';
 
@@ -120,12 +120,11 @@ class _EditStudentDialogState extends ConsumerState<EditStudentDialog> {
                           : _subjectsController.text,
                     );
               } else {
-                final authState = ref.read(authStateProvider);
-                if (authState.value != null) {
+                final supabase = ref.read(supabaseServiceProvider);
+                final user = supabase.client.auth.currentUser;
+                if (user != null) {
                   await ref
-                      .read(
-                        studentManagementProvider(authState.value!.id).notifier,
-                      )
+                      .read(studentManagementProvider(user.id).notifier)
                       .addStudent(_subjectsController.text);
                 }
               }

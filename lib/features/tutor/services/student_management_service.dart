@@ -119,8 +119,8 @@ class StudentManagementService {
           assignmentId: assignment['id'],
           title: assignment['title'],
           dueDate: DateTime.parse(assignment['due_date']),
-          submitted: data['submitted'],
-          score: (data['score'] as num?)?.toDouble(),
+          completed: data['submitted'] as bool? ?? false,
+          score: (data['score'] as num?)?.toDouble() ?? 0.0,
           feedback: data['feedback'],
         );
       }).toList();
@@ -142,9 +142,9 @@ class StudentManagementService {
 
       return StudentProgress(
         studentId: studentId,
-        attendance: attendance,
+        sessionHistory: attendance,
         assignments: assignments,
-        subjectProgress: subjectProgress,
+        subjectPerformance: subjectProgress,
       );
     } catch (e) {
       throw Exception('Failed to get student progress: ${e.toString()}');

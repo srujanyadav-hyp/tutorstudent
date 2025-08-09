@@ -14,6 +14,7 @@ _$ChatMessageImpl _$$ChatMessageImplFromJson(Map<String, dynamic> json) =>
       message: json['message'] as String,
       createdAt: DateTime.parse(json['created_at'] as String),
       isRead: json['is_read'] as bool? ?? false,
+      attachmentUrl: json['attachment_url'] as String?,
     );
 
 Map<String, dynamic> _$$ChatMessageImplToJson(_$ChatMessageImpl instance) =>
@@ -24,4 +25,5 @@ Map<String, dynamic> _$$ChatMessageImplToJson(_$ChatMessageImpl instance) =>
       'message': instance.message,
       'created_at': instance.createdAt.toIso8601String(),
       'is_read': instance.isRead,
+      'attachment_url': instance.attachmentUrl,
     };

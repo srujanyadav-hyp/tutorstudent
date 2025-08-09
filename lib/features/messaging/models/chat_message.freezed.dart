@@ -42,8 +42,16 @@ mixin _$ChatMessage {
   @JsonKey(name: 'is_read')
   bool get isRead => throw _privateConstructorUsedError;
 
+  /// URL of an attached file, if any
+  @JsonKey(name: 'attachment_url')
+  String? get attachmentUrl => throw _privateConstructorUsedError;
+
+  /// Serializes this ChatMessage to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-  @JsonKey(ignore: true)
+
+  /// Create a copy of ChatMessage
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   $ChatMessageCopyWith<ChatMessage> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -60,7 +68,8 @@ abstract class $ChatMessageCopyWith<$Res> {
       @JsonKey(name: 'receiver_id') String receiverId,
       String message,
       @JsonKey(name: 'created_at') DateTime createdAt,
-      @JsonKey(name: 'is_read') bool isRead});
+      @JsonKey(name: 'is_read') bool isRead,
+      @JsonKey(name: 'attachment_url') String? attachmentUrl});
 }
 
 /// @nodoc
@@ -73,6 +82,8 @@ class _$ChatMessageCopyWithImpl<$Res, $Val extends ChatMessage>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
+  /// Create a copy of ChatMessage
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -82,6 +93,7 @@ class _$ChatMessageCopyWithImpl<$Res, $Val extends ChatMessage>
     Object? message = null,
     Object? createdAt = null,
     Object? isRead = null,
+    Object? attachmentUrl = freezed,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -108,6 +120,10 @@ class _$ChatMessageCopyWithImpl<$Res, $Val extends ChatMessage>
           ? _value.isRead
           : isRead // ignore: cast_nullable_to_non_nullable
               as bool,
+      attachmentUrl: freezed == attachmentUrl
+          ? _value.attachmentUrl
+          : attachmentUrl // ignore: cast_nullable_to_non_nullable
+              as String?,
     ) as $Val);
   }
 }
@@ -126,7 +142,8 @@ abstract class _$$ChatMessageImplCopyWith<$Res>
       @JsonKey(name: 'receiver_id') String receiverId,
       String message,
       @JsonKey(name: 'created_at') DateTime createdAt,
-      @JsonKey(name: 'is_read') bool isRead});
+      @JsonKey(name: 'is_read') bool isRead,
+      @JsonKey(name: 'attachment_url') String? attachmentUrl});
 }
 
 /// @nodoc
@@ -137,6 +154,8 @@ class __$$ChatMessageImplCopyWithImpl<$Res>
       _$ChatMessageImpl _value, $Res Function(_$ChatMessageImpl) _then)
       : super(_value, _then);
 
+  /// Create a copy of ChatMessage
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -146,6 +165,7 @@ class __$$ChatMessageImplCopyWithImpl<$Res>
     Object? message = null,
     Object? createdAt = null,
     Object? isRead = null,
+    Object? attachmentUrl = freezed,
   }) {
     return _then(_$ChatMessageImpl(
       id: null == id
@@ -172,6 +192,10 @@ class __$$ChatMessageImplCopyWithImpl<$Res>
           ? _value.isRead
           : isRead // ignore: cast_nullable_to_non_nullable
               as bool,
+      attachmentUrl: freezed == attachmentUrl
+          ? _value.attachmentUrl
+          : attachmentUrl // ignore: cast_nullable_to_non_nullable
+              as String?,
     ));
   }
 }
@@ -185,7 +209,8 @@ class _$ChatMessageImpl implements _ChatMessage {
       @JsonKey(name: 'receiver_id') required this.receiverId,
       required this.message,
       @JsonKey(name: 'created_at') required this.createdAt,
-      @JsonKey(name: 'is_read') this.isRead = false});
+      @JsonKey(name: 'is_read') this.isRead = false,
+      @JsonKey(name: 'attachment_url') this.attachmentUrl});
 
   factory _$ChatMessageImpl.fromJson(Map<String, dynamic> json) =>
       _$$ChatMessageImplFromJson(json);
@@ -218,9 +243,14 @@ class _$ChatMessageImpl implements _ChatMessage {
   @JsonKey(name: 'is_read')
   final bool isRead;
 
+  /// URL of an attached file, if any
+  @override
+  @JsonKey(name: 'attachment_url')
+  final String? attachmentUrl;
+
   @override
   String toString() {
-    return 'ChatMessage(id: $id, senderId: $senderId, receiverId: $receiverId, message: $message, createdAt: $createdAt, isRead: $isRead)';
+    return 'ChatMessage(id: $id, senderId: $senderId, receiverId: $receiverId, message: $message, createdAt: $createdAt, isRead: $isRead, attachmentUrl: $attachmentUrl)';
   }
 
   @override
@@ -236,15 +266,19 @@ class _$ChatMessageImpl implements _ChatMessage {
             (identical(other.message, message) || other.message == message) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
-            (identical(other.isRead, isRead) || other.isRead == isRead));
+            (identical(other.isRead, isRead) || other.isRead == isRead) &&
+            (identical(other.attachmentUrl, attachmentUrl) ||
+                other.attachmentUrl == attachmentUrl));
   }
 
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
-      runtimeType, id, senderId, receiverId, message, createdAt, isRead);
+  int get hashCode => Object.hash(runtimeType, id, senderId, receiverId,
+      message, createdAt, isRead, attachmentUrl);
 
-  @JsonKey(ignore: true)
+  /// Create a copy of ChatMessage
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
   _$$ChatMessageImplCopyWith<_$ChatMessageImpl> get copyWith =>
@@ -260,46 +294,55 @@ class _$ChatMessageImpl implements _ChatMessage {
 
 abstract class _ChatMessage implements ChatMessage {
   const factory _ChatMessage(
-      {required final String id,
-      @JsonKey(name: 'sender_id') required final String senderId,
-      @JsonKey(name: 'receiver_id') required final String receiverId,
-      required final String message,
-      @JsonKey(name: 'created_at') required final DateTime createdAt,
-      @JsonKey(name: 'is_read') final bool isRead}) = _$ChatMessageImpl;
+          {required final String id,
+          @JsonKey(name: 'sender_id') required final String senderId,
+          @JsonKey(name: 'receiver_id') required final String receiverId,
+          required final String message,
+          @JsonKey(name: 'created_at') required final DateTime createdAt,
+          @JsonKey(name: 'is_read') final bool isRead,
+          @JsonKey(name: 'attachment_url') final String? attachmentUrl}) =
+      _$ChatMessageImpl;
 
   factory _ChatMessage.fromJson(Map<String, dynamic> json) =
       _$ChatMessageImpl.fromJson;
 
-  @override
-
   /// Unique identifier for the message
-  String get id;
   @override
+  String get id;
 
   /// ID of the user who sent the message
+  @override
   @JsonKey(name: 'sender_id')
   String get senderId;
-  @override
 
   /// ID of the user who will receive the message
+  @override
   @JsonKey(name: 'receiver_id')
   String get receiverId;
-  @override
 
   /// The actual message content
-  String get message;
   @override
+  String get message;
 
   /// Timestamp when the message was created
+  @override
   @JsonKey(name: 'created_at')
   DateTime get createdAt;
-  @override
 
   /// Whether the message has been read by the receiver
+  @override
   @JsonKey(name: 'is_read')
   bool get isRead;
+
+  /// URL of an attached file, if any
   @override
-  @JsonKey(ignore: true)
+  @JsonKey(name: 'attachment_url')
+  String? get attachmentUrl;
+
+  /// Create a copy of ChatMessage
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
   _$$ChatMessageImplCopyWith<_$ChatMessageImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

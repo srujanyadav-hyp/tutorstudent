@@ -28,13 +28,39 @@ create policy "Allow user to access their profile"
 -- ============================
 create table if not exists students (
     id uuid primary key references user_profiles(id) on delete cascade,
-    tutor_id uuid references user_profiles(id),
-    parent_id uuid references user_profiles(id),
     grade text,
-    class_code text
+    subjects text[],
+    parent_id uuid references user_profiles(id),
+    created_at timestamp with time zone default now(),
+    updated_at timestamp with time zone default now()
 );
 
 alter table students enable row level security;
+
+create policy "Students can see/edit themselves"
+  on students for all
+  using (auth.uid() = id);
+
+-- ============================
+-- Table: student_tutor_connections
+-- ============================
+create table if not exists student_tutor_connections (
+    id uuid primary key default gen_random_uuid(),
+    tutor_id uuid references user_profiles(id),
+    student_id uuid references user_profiles(id),
+    grade text,
+    subjects text,
+    status text check (status in ('active', 'inactive')) default 'active',
+    connected_at timestamp with time zone default now(),
+    created_at timestamp with time zone default now(),
+    updated_at timestamp with time zone default now()
+);
+
+alter table student_tutor_connections enable row level security;
+
+create policy "Tutors can manage their connections"
+  on student_tutor_connections for all
+  using (auth.uid() = tutor_id or auth.uid() = student_id);
 
 create policy "Students can see/edit themselves"
   on students for all

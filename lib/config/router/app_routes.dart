@@ -16,6 +16,8 @@ import '../../features/tutor/models/student_management.dart';
 import '../../features/tutor/screens/student_detail_screen.dart';
 import '../../models/user_role.dart';
 import '../../providers/role_provider.dart';
+import '../../features/messaging/config/chat_routes.dart';
+import '../../features/live_session/screens/live_session_screen.dart';
 
 String? _getRedirectLocation(
   String location,
@@ -129,11 +131,45 @@ final goRouterProvider = Provider<GoRouter>((ref) {
               );
             },
           ),
+          GoRoute(
+            path: 'live-session/:sessionId',
+            builder: (context, state) {
+              final sessionId = state.pathParameters['sessionId']!;
+              final tutorId = supabase.auth.currentUser!.id;
+              final studentId =
+                  (state.extra as Map<String, dynamic>)['studentId'] as String;
+              return LiveSessionScreen(
+                sessionId: sessionId,
+                tutorId: tutorId,
+                studentId: studentId,
+                isTutor: true,
+              );
+            },
+          ),
+          ...chatRoutes,
         ],
       ),
       GoRoute(
         path: '/student',
         builder: (context, state) => const StudentDashboard(),
+        routes: [
+          GoRoute(
+            path: 'live-session/:sessionId',
+            builder: (context, state) {
+              final sessionId = state.pathParameters['sessionId']!;
+              final studentId = supabase.auth.currentUser!.id;
+              final tutorId =
+                  (state.extra as Map<String, dynamic>)['tutorId'] as String;
+              return LiveSessionScreen(
+                sessionId: sessionId,
+                tutorId: tutorId,
+                studentId: studentId,
+                isTutor: false,
+              );
+            },
+          ),
+          ...chatRoutes,
+        ],
       ),
       GoRoute(
         path: '/parent',

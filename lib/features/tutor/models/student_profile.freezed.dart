@@ -34,8 +34,12 @@ mixin _$StudentProfile {
   int get upcomingSessions => throw _privateConstructorUsedError;
   double get averageRating => throw _privateConstructorUsedError;
 
+  /// Serializes this StudentProfile to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-  @JsonKey(ignore: true)
+
+  /// Create a copy of StudentProfile
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   $StudentProfileCopyWith<StudentProfile> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -72,6 +76,8 @@ class _$StudentProfileCopyWithImpl<$Res, $Val extends StudentProfile>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
+  /// Create a copy of StudentProfile
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -178,6 +184,8 @@ class __$$StudentProfileImplCopyWithImpl<$Res>
       _$StudentProfileImpl _value, $Res Function(_$StudentProfileImpl) _then)
       : super(_value, _then);
 
+  /// Create a copy of StudentProfile
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -347,7 +355,7 @@ class _$StudentProfileImpl implements _StudentProfile {
                 other.averageRating == averageRating));
   }
 
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(
       runtimeType,
@@ -365,7 +373,9 @@ class _$StudentProfileImpl implements _StudentProfile {
       upcomingSessions,
       averageRating);
 
-  @JsonKey(ignore: true)
+  /// Create a copy of StudentProfile
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
   _$$StudentProfileImplCopyWith<_$StudentProfileImpl> get copyWith =>
@@ -425,8 +435,11 @@ abstract class _StudentProfile implements StudentProfile {
   int get upcomingSessions;
   @override
   double get averageRating;
+
+  /// Create a copy of StudentProfile
+  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   _$$StudentProfileImplCopyWith<_$StudentProfileImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

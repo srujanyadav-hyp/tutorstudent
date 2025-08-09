@@ -2,6 +2,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/chat_message.dart';
 
 class MessagingService {
+  final _supabase = Supabase.instance.client;
   final SupabaseClient _client = Supabase.instance.client;
 
   Stream<List<ChatMessage>> getChatMessages(String otherUserId) {
@@ -30,6 +31,7 @@ class MessagingService {
   Future<ChatMessage> sendMessage({
     required String receiverId,
     required String message,
+    String? attachmentUrl,
   }) async {
     final user = _client.auth.currentUser;
     if (user == null) throw Exception('Not authenticated');
@@ -40,6 +42,7 @@ class MessagingService {
           'sender_id': user.id,
           'receiver_id': receiverId,
           'message': message,
+          'attachment_url': attachmentUrl,
         })
         .select()
         .single();

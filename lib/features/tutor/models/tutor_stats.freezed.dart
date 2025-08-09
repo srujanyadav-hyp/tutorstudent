@@ -31,8 +31,12 @@ mixin _$TutorStats {
   List<SessionMetric> get sessionMetrics => throw _privateConstructorUsedError;
   List<EarningMetric> get earningMetrics => throw _privateConstructorUsedError;
 
+  /// Serializes this TutorStats to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-  @JsonKey(ignore: true)
+
+  /// Create a copy of TutorStats
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   $TutorStatsCopyWith<TutorStats> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -66,6 +70,8 @@ class _$TutorStatsCopyWithImpl<$Res, $Val extends TutorStats>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
+  /// Create a copy of TutorStats
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -154,6 +160,8 @@ class __$$TutorStatsImplCopyWithImpl<$Res>
       _$TutorStatsImpl _value, $Res Function(_$TutorStatsImpl) _then)
       : super(_value, _then);
 
+  /// Create a copy of TutorStats
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -304,7 +312,7 @@ class _$TutorStatsImpl implements _TutorStats {
                 .equals(other._earningMetrics, _earningMetrics));
   }
 
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(
       runtimeType,
@@ -319,7 +327,9 @@ class _$TutorStatsImpl implements _TutorStats {
       const DeepCollectionEquality().hash(_sessionMetrics),
       const DeepCollectionEquality().hash(_earningMetrics));
 
-  @JsonKey(ignore: true)
+  /// Create a copy of TutorStats
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
   _$$TutorStatsImplCopyWith<_$TutorStatsImpl> get copyWith =>
@@ -369,8 +379,11 @@ abstract class _TutorStats implements TutorStats {
   List<SessionMetric> get sessionMetrics;
   @override
   List<EarningMetric> get earningMetrics;
+
+  /// Create a copy of TutorStats
+  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   _$$TutorStatsImplCopyWith<_$TutorStatsImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -384,8 +397,12 @@ mixin _$SessionMetric {
   DateTime get date => throw _privateConstructorUsedError;
   int get sessionCount => throw _privateConstructorUsedError;
 
+  /// Serializes this SessionMetric to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-  @JsonKey(ignore: true)
+
+  /// Create a copy of SessionMetric
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   $SessionMetricCopyWith<SessionMetric> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -409,6 +426,8 @@ class _$SessionMetricCopyWithImpl<$Res, $Val extends SessionMetric>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
+  /// Create a copy of SessionMetric
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -447,6 +466,8 @@ class __$$SessionMetricImplCopyWithImpl<$Res>
       _$SessionMetricImpl _value, $Res Function(_$SessionMetricImpl) _then)
       : super(_value, _then);
 
+  /// Create a copy of SessionMetric
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -494,11 +515,13 @@ class _$SessionMetricImpl implements _SessionMetric {
                 other.sessionCount == sessionCount));
   }
 
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(runtimeType, date, sessionCount);
 
-  @JsonKey(ignore: true)
+  /// Create a copy of SessionMetric
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
   _$$SessionMetricImplCopyWith<_$SessionMetricImpl> get copyWith =>
@@ -524,8 +547,11 @@ abstract class _SessionMetric implements SessionMetric {
   DateTime get date;
   @override
   int get sessionCount;
+
+  /// Create a copy of SessionMetric
+  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   _$$SessionMetricImplCopyWith<_$SessionMetricImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -539,8 +565,12 @@ mixin _$EarningMetric {
   DateTime get date => throw _privateConstructorUsedError;
   double get amount => throw _privateConstructorUsedError;
 
+  /// Serializes this EarningMetric to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-  @JsonKey(ignore: true)
+
+  /// Create a copy of EarningMetric
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   $EarningMetricCopyWith<EarningMetric> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -564,6 +594,8 @@ class _$EarningMetricCopyWithImpl<$Res, $Val extends EarningMetric>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
+  /// Create a copy of EarningMetric
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -602,6 +634,8 @@ class __$$EarningMetricImplCopyWithImpl<$Res>
       _$EarningMetricImpl _value, $Res Function(_$EarningMetricImpl) _then)
       : super(_value, _then);
 
+  /// Create a copy of EarningMetric
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -648,11 +682,13 @@ class _$EarningMetricImpl implements _EarningMetric {
             (identical(other.amount, amount) || other.amount == amount));
   }
 
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(runtimeType, date, amount);
 
-  @JsonKey(ignore: true)
+  /// Create a copy of EarningMetric
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
   _$$EarningMetricImplCopyWith<_$EarningMetricImpl> get copyWith =>
@@ -678,8 +714,11 @@ abstract class _EarningMetric implements EarningMetric {
   DateTime get date;
   @override
   double get amount;
+
+  /// Create a copy of EarningMetric
+  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   _$$EarningMetricImplCopyWith<_$EarningMetricImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

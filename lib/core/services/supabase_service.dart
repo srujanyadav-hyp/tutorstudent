@@ -9,13 +9,17 @@ class SupabaseService {
     if (user == null) return null;
 
     try {
-      final response = await client.from('user_profiles').select('''
+      final response = await client
+          .from('user_profiles')
+          .select('''
             *,
             students!inner(*),
             class_sessions!tutor_id(*),
             assignments!tutor_id(*),
             billing!parent_id(*)
-          ''').eq('id', user.id).single();
+          ''')
+          .eq('id', user.id)
+          .single();
       return response;
     } catch (e) {
       return null;
@@ -51,18 +55,22 @@ class SupabaseService {
       if (response.user != null) {
         try {
           // Step 1: Create user profile using the stored procedure
-          await client.rpc('create_user_profile', params: {
-            'user_id': response.user!.id,
-            'user_role': role,
-            'user_full_name': fullName,
-            'user_email': email,
-          });
+          await client.rpc(
+            'create_user_profile',
+            params: {
+              'user_id': response.user!.id,
+              'user_role': role,
+              'user_full_name': fullName,
+              'user_email': email,
+            },
+          );
 
           // Step 2: If this is a student, create student profile
           if (role == 'student') {
-            await client.rpc('create_student_profile', params: {
-              'p_user_id': response.user!.id,
-            });
+            await client.rpc(
+              'create_student_profile',
+              params: {'p_user_id': response.user!.id},
+            );
           }
         } catch (e) {
           throw 'Failed to create user profile: ${e.toString()}';
@@ -97,13 +105,16 @@ class SupabaseService {
     String? classCode,
   }) async {
     try {
-      final response = await client.rpc('create_student_profile', params: {
-        'p_user_id': studentId,
-        'p_tutor_id': tutorId,
-        'p_parent_id': parentId,
-        'p_grade': grade,
-        'p_class_code': classCode,
-      });
+      final response = await client.rpc(
+        'create_student_profile',
+        params: {
+          'p_user_id': studentId,
+          'p_tutor_id': tutorId,
+          'p_parent_id': parentId,
+          'p_grade': grade,
+          'p_class_code': classCode,
+        },
+      );
 
       return Map<String, dynamic>.from(response as Map);
     } catch (e) {
@@ -188,17 +199,34 @@ class SupabaseService {
 
   Future<List<Map<String, dynamic>>> getAssignments(String tutorId) async {
     try {
-      final response = await client.from('assignments').select('''
+      final response = await client
+          .from('assignments')
+          .select('''
             *,
             assignment_submissions (
               *,
               student:user_profiles!inner(*)
             )
-          ''').eq('tutor_id', tutorId).order('due_date');
+          ''')
+          .eq('tutor_id', tutorId)
+          .order('due_date');
 
       return List<Map<String, dynamic>>.from(response);
     } catch (e) {
       throw 'Failed to get assignments: ${e.toString()}';
+    }
+  }
+
+  Future<String> getUserName(String userId) async {
+    try {
+      final response = await client
+          .from('user_profiles')
+          .select('full_name')
+          .eq('id', userId)
+          .single();
+      return response['full_name'] as String;
+    } catch (e) {
+      return 'Unknown User';
     }
   }
 }

@@ -1,7 +1,6 @@
 // ignore_for_file: invalid_annotation_target
 
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:json_annotation/json_annotation.dart';
 
 part 'chat_message.freezed.dart';
 part 'chat_message.g.dart';
@@ -29,6 +28,9 @@ class ChatMessage with _$ChatMessage {
 
     /// Whether the message has been read by the receiver
     @JsonKey(name: 'is_read') @Default(false) bool isRead,
+
+    /// URL of an attached file, if any
+    @JsonKey(name: 'attachment_url') String? attachmentUrl,
   }) = _ChatMessage;
 
   /// Creates a ChatMessage instance from a JSON map
@@ -40,6 +42,7 @@ class ChatMessage with _$ChatMessage {
     required String senderId,
     required String receiverId,
     required String message,
+    String? attachmentUrl,
   }) => ChatMessage(
     id: DateTime.now().toIso8601String(), // Use timestamp as temporary ID
     senderId: senderId,
@@ -47,5 +50,6 @@ class ChatMessage with _$ChatMessage {
     message: message,
     createdAt: DateTime.now(),
     isRead: false,
+    attachmentUrl: attachmentUrl,
   );
 }
