@@ -3,18 +3,18 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/session_provider.dart';
 import '../widgets/session_card.dart';
 import '../widgets/session_form.dart';
-import '../models/tutor_session.dart';
+import '../models/session.dart';
 
 class SessionsScreen extends ConsumerWidget {
   final String tutorId;
 
-  const SessionsScreen({
-    super.key,
-    required this.tutorId,
-  });
+  const SessionsScreen({super.key, required this.tutorId});
 
-  void _showSessionForm(BuildContext context, WidgetRef ref,
-      [TutorSession? session]) {
+  void _showSessionForm(
+    BuildContext context,
+    WidgetRef ref, [
+    Session? session,
+  ]) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -35,32 +35,41 @@ class SessionsScreen extends ConsumerWidget {
             const SizedBox(height: 16),
             SessionForm(
               session: session,
-              onSubmit: (title, description, scheduledAt, videoLink) async {
-                if (session == null) {
-                  await ref
-                      .read(sessionNotifierProvider(tutorId).notifier)
-                      .createSession(
-                        title: title,
-                        description: description,
-                        scheduledAt: scheduledAt,
-                        videoLink: videoLink,
-                      );
-                } else {
-                  await ref
-                      .read(sessionNotifierProvider(tutorId).notifier)
-                      .updateSession(
-                        session.copyWith(
-                          title: title,
-                          description: description,
-                          scheduledAt: scheduledAt,
-                          videoLink: videoLink,
-                        ),
-                      );
-                }
-                if (context.mounted) {
-                  Navigator.pop(context);
-                }
-              },
+              onSubmit:
+                  (
+                    title,
+                    description,
+                    scheduledAt,
+                    videoLink,
+                    studentIds,
+                  ) async {
+                    if (session == null) {
+                      await ref
+                          .read(sessionNotifierProvider(tutorId).notifier)
+                          .createSession(
+                            title: title,
+                            description: description,
+                            scheduledAt: scheduledAt,
+                            videoLink: videoLink,
+                            studentIds: studentIds,
+                          );
+                    } else {
+                      await ref
+                          .read(sessionNotifierProvider(tutorId).notifier)
+                          .updateSession(
+                            session.copyWith(
+                              title: title,
+                              description: description,
+                              scheduledAt: scheduledAt,
+                              videoLink: videoLink,
+                              studentIds: studentIds,
+                            ),
+                          );
+                    }
+                    if (context.mounted) {
+                      Navigator.pop(context);
+                    }
+                  },
             ),
           ],
         ),
@@ -69,7 +78,10 @@ class SessionsScreen extends ConsumerWidget {
   }
 
   Future<void> _confirmDelete(
-      BuildContext context, WidgetRef ref, String sessionId) async {
+    BuildContext context,
+    WidgetRef ref,
+    String sessionId,
+  ) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -82,10 +94,7 @@ class SessionsScreen extends ConsumerWidget {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text(
-              'Delete',
-              style: TextStyle(color: Colors.red),
-            ),
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -103,9 +112,7 @@ class SessionsScreen extends ConsumerWidget {
     final sessionsAsync = ref.watch(tutorSessionsProvider(tutorId));
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Sessions'),
-      ),
+      appBar: AppBar(title: const Text('Sessions')),
       body: sessionsAsync.when(
         data: (sessions) {
           if (sessions.isEmpty) {
@@ -136,19 +143,17 @@ class SessionsScreen extends ConsumerWidget {
                 session: session,
                 onEdit: () => _showSessionForm(context, ref, session),
                 onDelete: () => _confirmDelete(context, ref, session.id),
-                onStatusChange: (status) {
+                onStatusChange: (newStatus) {
                   ref
                       .read(sessionNotifierProvider(tutorId).notifier)
-                      .updateSessionStatus(session.id, status);
+                      .updateSessionStatus(session.id, newStatus);
                 },
               );
             },
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => Center(
-          child: Text('Error: $error'),
-        ),
+        error: (error, stack) => Center(child: Text('Error: $error')),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showSessionForm(context, ref),

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import '../models/tutor_session.dart';
+import '../models/session.dart';
 import 'package:intl/intl.dart';
 
 class SessionCard extends StatelessWidget {
-  final TutorSession session;
+  final Session session;
   final VoidCallback? onEdit;
   final VoidCallback? onDelete;
-  final Function(String)? onStatusChange;
+  final Function(SessionStatus)? onStatusChange;
 
   const SessionCard({
     super.key,
@@ -23,21 +23,19 @@ class SessionCard extends StatelessWidget {
     final timeFormat = DateFormat('hh:mm a');
 
     Color statusColor;
-    switch (session.status.toLowerCase()) {
-      case 'scheduled':
+    switch (session.status) {
+      case SessionStatus.scheduled:
         statusColor = Colors.blue;
         break;
-      case 'ongoing':
+      case SessionStatus.inProgress:
         statusColor = Colors.green;
         break;
-      case 'completed':
+      case SessionStatus.completed:
         statusColor = Colors.grey;
         break;
-      case 'cancelled':
+      case SessionStatus.cancelled:
         statusColor = Colors.red;
         break;
-      default:
-        statusColor = Colors.grey;
     }
 
     return Card(
@@ -50,29 +48,26 @@ class SessionCard extends StatelessWidget {
             Row(
               children: [
                 Expanded(
-                  child: Text(
-                    session.title,
-                    style: theme.textTheme.titleLarge,
-                  ),
+                  child: Text(session.title, style: theme.textTheme.titleLarge),
                 ),
-                PopupMenuButton<String>(
+                PopupMenuButton<SessionStatus>(
                   onSelected: onStatusChange,
                   itemBuilder: (context) => [
-                    const PopupMenuItem(
-                      value: 'scheduled',
-                      child: Text('Mark as Scheduled'),
+                    PopupMenuItem(
+                      value: SessionStatus.scheduled,
+                      child: const Text('Mark as Scheduled'),
                     ),
-                    const PopupMenuItem(
-                      value: 'ongoing',
-                      child: Text('Mark as Ongoing'),
+                    PopupMenuItem(
+                      value: SessionStatus.inProgress,
+                      child: const Text('Mark as In Progress'),
                     ),
-                    const PopupMenuItem(
-                      value: 'completed',
-                      child: Text('Mark as Completed'),
+                    PopupMenuItem(
+                      value: SessionStatus.completed,
+                      child: const Text('Mark as Completed'),
                     ),
-                    const PopupMenuItem(
-                      value: 'cancelled',
-                      child: Text('Mark as Cancelled'),
+                    PopupMenuItem(
+                      value: SessionStatus.cancelled,
+                      child: const Text('Mark as Cancelled'),
                     ),
                   ],
                 ),
@@ -80,10 +75,7 @@ class SessionCard extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             if (session.description != null) ...[
-              Text(
-                session.description!,
-                style: theme.textTheme.bodyMedium,
-              ),
+              Text(session.description!, style: theme.textTheme.bodyMedium),
               const SizedBox(height: 8),
             ],
             Row(
@@ -116,7 +108,7 @@ class SessionCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
-                    session.status.toUpperCase(),
+                    session.status.name.toUpperCase(),
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: statusColor,
                       fontWeight: FontWeight.bold,
@@ -125,10 +117,7 @@ class SessionCard extends StatelessWidget {
                 ),
                 const Spacer(),
                 if (onEdit != null)
-                  IconButton(
-                    icon: const Icon(Icons.edit),
-                    onPressed: onEdit,
-                  ),
+                  IconButton(icon: const Icon(Icons.edit), onPressed: onEdit),
                 if (onDelete != null)
                   IconButton(
                     icon: const Icon(Icons.delete),

@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
-import '../models/tutor_session.dart';
+import '../models/session.dart';
 import '../../../features/auth/widgets/custom_text_form_field.dart';
 
 class SessionForm extends StatefulWidget {
-  final TutorSession? session;
-  final Function(String title, String? description, DateTime scheduledAt,
-      String? videoLink) onSubmit;
+  final Session? session;
+  final Function(
+    String title,
+    String? description,
+    DateTime scheduledAt,
+    String? videoLink,
+    List<String>? studentIds,
+  )
+  onSubmit;
 
-  const SessionForm({
-    super.key,
-    this.session,
-    required this.onSubmit,
-  });
+  const SessionForm({super.key, this.session, required this.onSubmit});
 
   @override
   State<SessionForm> createState() => _SessionFormState();
@@ -82,6 +84,7 @@ class _SessionFormState extends State<SessionForm> {
             : _descriptionController.text,
         _scheduledAt,
         _videoLinkController.text.isEmpty ? null : _videoLinkController.text,
+        widget.session?.studentIds,
       );
     }
   }
@@ -131,7 +134,8 @@ class _SessionFormState extends State<SessionForm> {
           ElevatedButton(
             onPressed: _handleSubmit,
             child: Text(
-                widget.session == null ? 'Create Session' : 'Update Session'),
+              widget.session == null ? 'Create Session' : 'Update Session',
+            ),
           ),
         ],
       ),

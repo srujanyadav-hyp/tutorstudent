@@ -8,7 +8,7 @@ import '../providers/tutor_dashboard_provider.dart';
 class TutorDashboardView extends ConsumerWidget {
   final String tutorId;
 
-  const TutorDashboardView({Key? key, required this.tutorId}) : super(key: key);
+  const TutorDashboardView({super.key, required this.tutorId});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -29,7 +29,7 @@ class TutorDashboardView extends ConsumerWidget {
 class _DashboardContent extends StatelessWidget {
   final TutorStats stats;
 
-  const _DashboardContent({Key? key, required this.stats}) : super(key: key);
+  const _DashboardContent({super.key, required this.stats});
 
   @override
   Widget build(BuildContext context) {
@@ -270,11 +270,11 @@ class _StatCard extends StatelessWidget {
   final IconData icon;
 
   const _StatCard({
-    Key? key,
+    super.key,
     required this.title,
     required this.value,
     required this.icon,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
