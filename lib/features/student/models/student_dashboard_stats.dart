@@ -1,37 +1,32 @@
-import 'package:flutter/foundation.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-@immutable
-class StudentDashboardStats {
-  final int totalSessions;
-  final int upcomingSessions;
-  final int completedAssignments;
-  final int pendingAssignments;
-  final double averageScore;
-  final Map<String, double> subjectPerformance;
-  final List<DateTime> sessionDates;
-  final List<double> progressTrend;
+part 'student_dashboard_stats.freezed.dart';
+part 'student_dashboard_stats.g.dart';
 
-  const StudentDashboardStats({
-    required this.totalSessions,
-    required this.upcomingSessions,
-    required this.completedAssignments,
-    required this.pendingAssignments,
-    required this.averageScore,
-    required this.subjectPerformance,
-    required this.sessionDates,
-    required this.progressTrend,
-  });
+@freezed
+class StudentDashboardStats with _$StudentDashboardStats {
+  const factory StudentDashboardStats({
+    required int totalSessions,
+    required int upcomingSessions,
+    required int completedAssignments,
+    required int pendingAssignments,
+    required double averageScore,
+    required Map<String, double> subjectPerformance,
+    required List<DateTime> sessionDates,
+    required List<double> progressTrend,
+  }) = _StudentDashboardStats;
 
-  factory StudentDashboardStats.empty() {
-    return const StudentDashboardStats(
-      totalSessions: 0,
-      upcomingSessions: 0,
-      completedAssignments: 0,
-      pendingAssignments: 0,
-      averageScore: 0,
-      subjectPerformance: {},
-      sessionDates: [],
-      progressTrend: [],
-    );
-  }
+  factory StudentDashboardStats.fromJson(Map<String, dynamic> json) =>
+      _$StudentDashboardStatsFromJson(json);
+
+  factory StudentDashboardStats.empty() => const StudentDashboardStats(
+    totalSessions: 0,
+    upcomingSessions: 0,
+    completedAssignments: 0,
+    pendingAssignments: 0,
+    averageScore: 0,
+    subjectPerformance: {},
+    sessionDates: [],
+    progressTrend: [],
+  );
 }
