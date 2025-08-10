@@ -6,14 +6,18 @@ class SessionService extends BaseService {
   SessionService(SupabaseClient client) : super(client, 'sessions');
 
   Future<List<Session>> getTutorSessions(String tutorId) async {
-    final response =
-        await table.select().eq('tutor_id', tutorId).order('scheduled_at');
+    final response = await table
+        .select()
+        .eq('tutor_id', tutorId)
+        .order('scheduled_at');
     return response.map((json) => Session.fromJson(json)).toList();
   }
 
   Future<List<Session>> getStudentSessions(String studentId) async {
-    final response =
-        await table.select().eq('student_id', studentId).order('scheduled_at');
+    final response = await table
+        .select()
+        .eq('student_id', studentId)
+        .order('scheduled_at');
     return response.map((json) => Session.fromJson(json)).toList();
   }
 
@@ -27,9 +31,12 @@ class SessionService extends BaseService {
   }
 
   Future<void> updateSessionStatus(
-      String sessionId, SessionStatus status) async {
-    await table.update({'status': status.toString().split('.').last}).eq(
-        'id', sessionId);
+    String sessionId,
+    SessionStatus status,
+  ) async {
+    await table
+        .update({'status': status.toString().split('.').last})
+        .eq('id', sessionId);
   }
 
   Future<Session> scheduleSession({

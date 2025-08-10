@@ -54,9 +54,11 @@ class PaymentService extends BaseService {
   }
 
   Future<void> updatePaymentStatus(
-      String paymentId, PaymentStatus status) async {
-    await table.update({
-      'status': status.toString().split('.').last,
-    }).eq('id', paymentId);
+    String paymentId,
+    PaymentStatus status,
+  ) async {
+    await table
+        .update({'status': status.toString().split('.').last})
+        .eq('id', paymentId);
   }
 }
