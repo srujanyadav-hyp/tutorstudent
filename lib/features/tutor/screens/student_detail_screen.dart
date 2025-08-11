@@ -18,7 +18,6 @@ class StudentDetailScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final dateFormat = DateFormat('MMM dd, yyyy');
     final progressAsync = ref.watch(studentProgressProvider(studentId));
 
     return Scaffold(
@@ -92,7 +91,7 @@ class StudentDetailScreen extends ConsumerWidget {
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () {
-                  ref.refresh(studentProgressProvider(studentId));
+                  ref.invalidate(studentProgressProvider(studentId));
                 },
                 child: const Text('RETRY'),
               ),
@@ -135,7 +134,7 @@ class StudentDetailScreen extends ConsumerWidget {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.green.withOpacity(0.1),
+                      color: Colors.green.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: const Text(
@@ -167,7 +166,7 @@ class StudentDetailScreen extends ConsumerWidget {
                 ),
                 _buildStatColumn(
                   'Performance',
-                  '${(student.averagePerformance * 100).round()}%',
+                  '${(student.averagePerformance * 100).toInt()}%',
                   Icons.trending_up,
                   theme,
                 ),
@@ -216,7 +215,7 @@ class StudentDetailScreen extends ConsumerWidget {
                       ),
                     ),
                     Text(
-                      '${(performance * 100).round()}%',
+                      '${(performance * 100).toInt()}%',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -238,7 +237,6 @@ class StudentDetailScreen extends ConsumerWidget {
   }
 
   Widget _buildSessionHistory(BuildContext context, StudentProgress progress) {
-    final theme = Theme.of(context);
     final dateFormat = DateFormat('MMM dd, yyyy');
 
     return Card(
@@ -286,7 +284,7 @@ class StudentDetailScreen extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  '${(assignment.score * 100).round()}%',
+                  '${(assignment.score * 100).toInt()}%',
                   style: theme.textTheme.titleMedium?.copyWith(
                     color: theme.primaryColor,
                     fontWeight: FontWeight.bold,

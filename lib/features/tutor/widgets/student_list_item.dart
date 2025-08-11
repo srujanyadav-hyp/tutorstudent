@@ -61,7 +61,7 @@ class StudentListItem extends StatelessWidget {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.green.withOpacity(0.1),
+                        color: Colors.green.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: const Text(
@@ -95,7 +95,7 @@ class StudentListItem extends StatelessWidget {
                   _buildStatItem(
                     Icons.trending_up,
                     'Performance',
-                    '${(student.averagePerformance * 100).round()}%',
+                    '${(student.averagePerformance * 100).toInt()}%',
                     theme,
                   ),
                 ],

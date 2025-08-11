@@ -23,21 +23,32 @@ class StudentsService {
       if (user == null) throw Exception('Not authenticated');
 
       final response = await supabase
-          .from('parent_students')
+          .from('students')
           .select('''
           id,
-          student:student_id (
+          grade,
+          created_at,
+          user_profiles!inner(
             id,
-            user_id,
             full_name,
-            grade,
-            profile_image,
-            created_at
+            profile_image
           )
         ''')
           .eq('parent_id', user.id);
 
-      return List<Map<String, dynamic>>.from(response);
+      return (response as List).map((student) {
+        final userProfile = student['user_profiles'] as Map<String, dynamic>;
+        return {
+          'id': student['id'],
+          'student': {
+            'id': userProfile['id'],
+            'full_name': userProfile['full_name'],
+            'grade': student['grade'],
+            'profile_image': userProfile['profile_image'],
+            'created_at': student['created_at'],
+          },
+        };
+      }).toList();
     } catch (e) {
       throw Exception('Failed to fetch linked students: ${e.toString()}');
     }
@@ -63,20 +74,21 @@ class StudentsService {
 
       // Check for existing link
       final existingLink = await supabase
-          .from('parent_students')
+          .from('students')
           .select('id')
+          .eq('id', studentId)
           .eq('parent_id', user.id)
-          .eq('student_id', studentId)
           .maybeSingle();
 
       if (existingLink != null) {
         throw DuplicateLinkError('Student is already linked to this parent');
       }
 
-      // Create the link
+      // Create the link by updating the student's parent_id
       final response = await supabase
-          .from('parent_students')
-          .insert({'parent_id': user.id, 'student_id': studentId})
+          .from('students')
+          .update({'parent_id': user.id})
+          .eq('id', studentId)
           .select('id')
           .single();
 
@@ -96,10 +108,10 @@ class StudentsService {
       if (user == null) throw Exception('Not authenticated');
 
       final result = await supabase
-          .from('parent_students')
-          .delete()
+          .from('students')
+          .update({'parent_id': null})
+          .eq('id', studentId)
           .eq('parent_id', user.id)
-          .eq('student_id', studentId)
           .select('id')
           .maybeSingle();
 

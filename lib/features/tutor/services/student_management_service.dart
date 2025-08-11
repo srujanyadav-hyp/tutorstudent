@@ -14,53 +14,21 @@ class StudentManagementService {
       final response = await _supabase
           .from('student_tutor_connections')
           .select('''
-            *,
-            user:user_profiles!student_id(*),
-            sessions!inner(
+            id,
+            student_id,
+            grade,
+            subjects,
+            status,
+            user:user_profiles!student_id(
               id,
-              created_at,
-              status
-            ),
-            assignments!inner(
-              id,
-              title,
-              due_date,
-              status,
-              score
+              full_name,
+              email
             )
           ''')
           .eq('tutor_id', tutorId);
 
       return (response as List).map((data) {
         final user = data['user'] as Map<String, dynamic>;
-        final sessions = data['sessions'] as List;
-        final assignments = data['assignments'] as List;
-
-        final completedSessions = sessions
-            .where((s) => s['status'] == 'completed')
-            .length;
-        final upcomingSessions = sessions
-            .where((s) => s['status'] == 'scheduled')
-            .length;
-
-        // Calculate average performance from assignments
-        double avgPerformance = 0;
-        if (assignments.isNotEmpty) {
-          final totalScore = assignments.fold<double>(
-            0,
-            (sum, assignment) =>
-                sum + (assignment['score'] as num? ?? 0).toDouble(),
-          );
-          avgPerformance = totalScore / assignments.length;
-        }
-
-        // Get the last session date
-        DateTime? lastSessionDate;
-        if (sessions.isNotEmpty) {
-          lastSessionDate = sessions
-              .map((s) => DateTime.parse(s['created_at']))
-              .reduce((a, b) => a.isAfter(b) ? a : b);
-        }
 
         return ManagedStudent(
           id: data['id'],
@@ -70,10 +38,10 @@ class StudentManagementService {
           grade: data['grade'],
           subjects: data['subjects'],
           isActive: data['status'] == 'active',
-          lastSessionDate: lastSessionDate,
-          completedSessions: completedSessions,
-          upcomingSessions: upcomingSessions,
-          averagePerformance: avgPerformance,
+          lastSessionDate: null,
+          completedSessions: 0,
+          upcomingSessions: 0,
+          averagePerformance: 0,
         );
       }).toList();
     } catch (e) {
@@ -153,21 +121,48 @@ class StudentManagementService {
 
   Future<void> addStudent(String tutorId, String studentEmail) async {
     try {
-      // First, check if the user exists
+      // First, check if the user exists and is a student
       final userResponse = await _supabase
           .from('user_profiles')
-          .select()
+          .select('id, role')
           .eq('email', studentEmail)
-          .single();
+          .maybeSingle();
+
+      if (userResponse == null) {
+        throw Exception('Student not found with this email');
+      }
+
+      if (userResponse['role'] != 'student') {
+        throw Exception('User is not a student');
+      }
+
+      final studentId = userResponse['id'] as String;
+
+      // Check if connection already exists
+      final existingConnection = await _supabase
+          .from('student_tutor_connections')
+          .select('id')
+          .eq('tutor_id', tutorId)
+          .eq('student_id', studentId)
+          .eq('status', 'active')
+          .maybeSingle();
+
+      if (existingConnection != null) {
+        throw Exception('Student is already connected to this tutor');
+      }
 
       // Create connection
       await _supabase.from('student_tutor_connections').insert({
         'tutor_id': tutorId,
-        'student_id': userResponse['id'],
+        'student_id': studentId,
         'status': 'active',
       });
     } catch (e) {
-      throw Exception('Failed to add student: ${e.toString()}');
+      if (e is PostgrestException) {
+        throw Exception('Database error: ${e.message}');
+      } else {
+        throw Exception('Failed to add student: ${e.toString()}');
+      }
     }
   }
 

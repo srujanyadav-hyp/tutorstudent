@@ -12,8 +12,11 @@ final parentDashboardStatsProvider =
     });
 
 final linkedStudentsProvider =
-    StreamProvider.family<List<Map<String, dynamic>>, String>((ref, parentId) {
-      return ref
+    FutureProvider.family<List<Map<String, dynamic>>, String>((
+      ref,
+      parentId,
+    ) async {
+      return await ref
           .read(parentDashboardServiceProvider)
-          .streamLinkedStudents(parentId);
+          .getLinkedStudents(parentId);
     });

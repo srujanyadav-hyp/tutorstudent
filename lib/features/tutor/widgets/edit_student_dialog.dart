@@ -17,6 +17,7 @@ class _EditStudentDialogState extends ConsumerState<EditStudentDialog> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _gradeController;
   late final TextEditingController _subjectsController;
+  late final TextEditingController _studentEmailController;
   bool _isActive = true;
 
   @override
@@ -24,6 +25,7 @@ class _EditStudentDialogState extends ConsumerState<EditStudentDialog> {
     super.initState();
     _gradeController = TextEditingController(text: widget.student?.grade);
     _subjectsController = TextEditingController(text: widget.student?.subjects);
+    _studentEmailController = TextEditingController();
     _isActive = widget.student?.isActive ?? true;
   }
 
@@ -31,12 +33,12 @@ class _EditStudentDialogState extends ConsumerState<EditStudentDialog> {
   void dispose() {
     _gradeController.dispose();
     _subjectsController.dispose();
+    _studentEmailController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final isEditing = widget.student != null;
 
     return AlertDialog(
@@ -48,6 +50,7 @@ class _EditStudentDialogState extends ConsumerState<EditStudentDialog> {
           children: [
             if (!isEditing)
               TextFormField(
+                controller: _studentEmailController,
                 decoration: const InputDecoration(
                   labelText: 'Student Email',
                   hintText: 'Enter student email to connect with',
@@ -125,7 +128,7 @@ class _EditStudentDialogState extends ConsumerState<EditStudentDialog> {
                 if (user != null) {
                   await ref
                       .read(studentManagementProvider(user.id).notifier)
-                      .addStudent(_subjectsController.text);
+                      .addStudent(_studentEmailController.text);
                 }
               }
 

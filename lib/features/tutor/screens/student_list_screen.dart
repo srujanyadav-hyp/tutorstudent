@@ -133,26 +133,24 @@ class StudentListScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 16),
               ElevatedButton(
-                onPressed: () {
-                  final refresh = ref.refresh(
-                    managedStudentsProvider(user.id).future,
-                  );
-                  refresh
-                      .then((_) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Student list refreshed'),
-                          ),
-                        );
-                      })
-                      .catchError((error) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('Error: $error'),
-                            backgroundColor: Colors.red,
-                          ),
-                        );
-                      });
+                onPressed: () async {
+                  try {
+                    ref.invalidate(managedStudentsProvider(user.id));
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Student list refreshed')),
+                      );
+                    }
+                  } catch (error) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Error: $error'),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                    }
+                  }
                 },
                 child: const Text('RETRY'),
               ),
