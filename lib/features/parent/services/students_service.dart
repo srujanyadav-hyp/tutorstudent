@@ -83,7 +83,7 @@ class StudentsService {
       return response['id'] as String;
     } catch (e) {
       if (e is StudentNotFoundError || e is DuplicateLinkError) {
-        throw e;
+        rethrow;
       }
       throw Exception('Failed to link student: ${e.toString()}');
     }

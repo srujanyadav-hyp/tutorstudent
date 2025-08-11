@@ -15,17 +15,35 @@ class AssignmentListScreen extends ConsumerWidget {
       return const Scaffold(body: Center(child: Text('Not authenticated')));
     }
 
-    final assignmentsAsync = ref.watch(assignmentsProvider(user.id));
+    final assignmentsAsync = ref.watch(assignmentsFilteredProvider(user.id));
 
     return StudentScaffold(
       title: 'My Assignments',
       currentIndex: 3,
       actions: [
-        IconButton(
+        PopupMenuButton<String>(
           icon: const Icon(Icons.filter_list),
-          onPressed: () {
-            // TODO: Implement assignment filtering
+          onSelected: (value) {
+            switch (value) {
+              case 'all':
+                ref.read(assignmentFilterProvider.notifier).state =
+                    AssignmentFilter.all;
+                break;
+              case 'pending':
+                ref.read(assignmentFilterProvider.notifier).state =
+                    AssignmentFilter.pending;
+                break;
+              case 'submitted':
+                ref.read(assignmentFilterProvider.notifier).state =
+                    AssignmentFilter.submitted;
+                break;
+            }
           },
+          itemBuilder: (context) => const [
+            PopupMenuItem(value: 'all', child: Text('All')),
+            PopupMenuItem(value: 'pending', child: Text('Pending')),
+            PopupMenuItem(value: 'submitted', child: Text('Submitted')),
+          ],
         ),
       ],
       body: assignmentsAsync.when(

@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 class AssignmentCard extends StatelessWidget {
   final Map<String, dynamic> assignment;
 
-  const AssignmentCard({Key? key, required this.assignment}) : super(key: key);
+  const AssignmentCard({super.key, required this.assignment});
 
   @override
   Widget build(BuildContext context) {
@@ -17,11 +17,11 @@ class AssignmentCard extends StatelessWidget {
       margin: const EdgeInsets.symmetric(vertical: 8.0),
       child: ListTile(
         leading: CircleAvatar(
+          backgroundColor: _getStatusColor(assignment['status']),
           child: Icon(
             _getStatusIcon(assignment['status']),
             color: Colors.white,
           ),
-          backgroundColor: _getStatusColor(assignment['status']),
         ),
         title: Text(assignment['title'] ?? 'Untitled Assignment'),
         subtitle: Column(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:tutorconnect/features/student/screens/assignment_list_screen.dart';
 import 'package:tutorconnect/features/student/screens/progress_screen.dart';
 import 'package:tutorconnect/features/student/screens/session_detail_screen.dart';
@@ -51,7 +52,15 @@ final studentRoutes = [
     path: '/student/sessions/:id/live',
     builder: (BuildContext context, GoRouterState state) {
       final sessionId = state.pathParameters['id']!;
-      return LiveSessionScreen(sessionId: sessionId);
+      final studentId = Supabase.instance.client.auth.currentUser!.id;
+      final extra = state.extra as Map<String, dynamic>;
+      final tutorId = extra['tutorId'] as String;
+      return LiveSessionScreen(
+        sessionId: sessionId,
+        tutorId: tutorId,
+        studentId: studentId,
+        isTutor: false,
+      );
     },
   ),
   GoRoute(

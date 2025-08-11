@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:go_router/go_router.dart';
 import '../widgets/student_scaffold.dart';
 import '../providers/student_provider.dart';
 import '../widgets/session_feedback_dialog.dart';
@@ -86,7 +87,13 @@ class SessionDetailScreen extends ConsumerWidget {
                         trailing: IconButton(
                           icon: const Icon(Icons.message),
                           onPressed: () {
-                            // TODO: Navigate to chat with tutor
+                            GoRouter.of(context).push(
+                              '/chat/${session['tutor_id']}',
+                              extra: {
+                                'userName': session['tutor_name'],
+                                'userImage': session['tutor_profile_image'],
+                              },
+                            );
                           },
                         ),
                       ),

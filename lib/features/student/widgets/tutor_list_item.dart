@@ -39,7 +39,7 @@ class TutorListItem extends StatelessWidget {
                     radius: 30,
                   )
                 else
-                  const CircleAvatar(child: Icon(Icons.person), radius: 30),
+                  const CircleAvatar(radius: 30, child: Icon(Icons.person)),
                 const SizedBox(width: 16),
                 Expanded(
                   child: Column(

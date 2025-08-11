@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class TutorCard extends StatelessWidget {
   final Map<String, dynamic> tutor;
 
-  const TutorCard({Key? key, required this.tutor}) : super(key: key);
+  const TutorCard({super.key, required this.tutor});
 
   @override
   Widget build(BuildContext context) {

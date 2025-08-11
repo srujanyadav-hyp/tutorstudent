@@ -8,11 +8,11 @@ class ParticipantControls extends ConsumerStatefulWidget {
   final Map<String, bool> participantStates;
 
   const ParticipantControls({
-    Key? key,
+    super.key,
     required this.sessionId,
     required this.isTutor,
     required this.participantStates,
-  }) : super(key: key);
+  });
 
   @override
   ConsumerState<ParticipantControls> createState() =>

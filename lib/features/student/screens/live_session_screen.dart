@@ -1,44 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../live_session/screens/live_session_screen.dart' as core_live;
 import '../widgets/student_scaffold.dart';
 
+// Thin wrapper to route students into the core live session UI
 class LiveSessionScreen extends ConsumerWidget {
   final String sessionId;
+  final String tutorId;
+  final String studentId;
+  final bool isTutor;
 
-  const LiveSessionScreen({super.key, required this.sessionId});
+  const LiveSessionScreen({
+    super.key,
+    required this.sessionId,
+    required this.tutorId,
+    required this.studentId,
+    required this.isTutor,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return StudentScaffold(
       title: 'Live Session',
       currentIndex: 2,
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // TODO: Implement live video session UI
-            const Icon(Icons.videocam, size: 64, color: Colors.red),
-            const SizedBox(height: 16),
-            const Text('Joining session...', style: TextStyle(fontSize: 20)),
-            const SizedBox(height: 32),
-            ElevatedButton.icon(
-              icon: const Icon(Icons.call_end),
-              label: const Text('End Session'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 32,
-                  vertical: 16,
-                ),
-              ),
-              onPressed: () {
-                // TODO: Implement session ending logic
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        ),
+      body: core_live.LiveSessionScreen(
+        sessionId: sessionId,
+        tutorId: tutorId,
+        studentId: studentId,
+        isTutor: isTutor,
       ),
     );
   }

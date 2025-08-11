@@ -4,7 +4,7 @@ import 'package:webview_flutter/webview_flutter.dart';
 class ScreenShareView extends StatelessWidget {
   final String url;
 
-  const ScreenShareView({Key? key, required this.url}) : super(key: key);
+  const ScreenShareView({super.key, required this.url});
 
   @override
   Widget build(BuildContext context) {

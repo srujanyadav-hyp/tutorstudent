@@ -15,7 +15,7 @@ class TutorListScreen extends ConsumerWidget {
       return const Scaffold(body: Center(child: Text('Not authenticated')));
     }
 
-    final tutorsAsync = ref.watch(availableTutorsProvider);
+    final tutorsAsync = ref.watch(availableTutorsFilteredProvider);
 
     return StudentScaffold(
       title: 'Find Tutors',
@@ -23,8 +23,14 @@ class TutorListScreen extends ConsumerWidget {
       actions: [
         IconButton(
           icon: const Icon(Icons.search),
-          onPressed: () {
-            // TODO: Implement search functionality
+          onPressed: () async {
+            final query = await showSearch<String>(
+              context: context,
+              delegate: _TutorSearchDelegate(),
+            );
+            if (query != null) {
+              ref.read(tutorSearchQueryProvider.notifier).state = query;
+            }
           },
         ),
       ],
@@ -98,6 +104,43 @@ class TutorListScreen extends ConsumerWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _TutorSearchDelegate extends SearchDelegate<String> {
+  @override
+  List<Widget>? buildActions(BuildContext context) {
+    return [
+      IconButton(
+        icon: const Icon(Icons.clear),
+        onPressed: () {
+          query = '';
+          showSuggestions(context);
+        },
+      ),
+    ];
+  }
+
+  @override
+  Widget? buildLeading(BuildContext context) {
+    return IconButton(
+      icon: const Icon(Icons.arrow_back),
+      onPressed: () => close(context, query),
+    );
+  }
+
+  @override
+  Widget buildResults(BuildContext context) {
+    close(context, query);
+    return const SizedBox.shrink();
+  }
+
+  @override
+  Widget buildSuggestions(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Text('Search tutors for "$query"'),
     );
   }
 }

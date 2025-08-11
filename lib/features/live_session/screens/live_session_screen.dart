@@ -13,12 +13,12 @@ class LiveSessionScreen extends ConsumerStatefulWidget {
   final bool isTutor;
 
   const LiveSessionScreen({
-    Key? key,
+    super.key,
     required this.sessionId,
     required this.tutorId,
     required this.studentId,
     required this.isTutor,
-  }) : super(key: key);
+  });
 
   @override
   ConsumerState<LiveSessionScreen> createState() => _LiveSessionScreenState();

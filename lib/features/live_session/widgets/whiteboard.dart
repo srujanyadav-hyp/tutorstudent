@@ -9,11 +9,11 @@ class Whiteboard extends ConsumerStatefulWidget {
   final bool isEditable;
 
   const Whiteboard({
-    Key? key,
+    super.key,
     required this.sessionId,
     this.initialData,
     required this.isEditable,
-  }) : super(key: key);
+  });
 
   @override
   ConsumerState<Whiteboard> createState() => _WhiteboardState();
@@ -218,10 +218,10 @@ class ColorPicker extends StatelessWidget {
   final ValueChanged<Color> onColorChanged;
 
   const ColorPicker({
-    Key? key,
+    super.key,
     required this.pickerColor,
     required this.onColorChanged,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

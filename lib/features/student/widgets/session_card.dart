@@ -89,7 +89,10 @@ class SessionCard extends ConsumerWidget {
                         foregroundColor: Colors.white,
                       ),
                       onPressed: () {
-                        context.push('/student/sessions/${session['id']}/live');
+                        context.push(
+                          '/student/sessions/${session['id']}/live',
+                          extra: {'tutorId': session['tutor_id']},
+                        );
                       },
                     ),
                   if (isUpcoming) ...[

@@ -11,6 +11,12 @@ import '../../features/onboarding/screens/role_selection_screen.dart';
 import '../../features/profile/screens/profile_screen.dart';
 import '../../features/tutor/screens/tutor_layout.dart';
 import '../../features/student/screens/student_dashboard.dart';
+import '../../features/student/screens/session_list_screen.dart';
+import '../../features/student/screens/session_detail_screen.dart';
+import '../../features/student/screens/assignment_list_screen.dart';
+import '../../features/student/screens/assignment_detail_screen.dart';
+import '../../features/student/screens/tutor_list_screen.dart';
+import '../../features/student/screens/progress_screen.dart';
 import '../../features/parent/screens/parent_dashboard.dart';
 import '../../features/tutor/models/student_management.dart';
 import '../../features/tutor/screens/student_detail_screen.dart';
@@ -154,6 +160,17 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const StudentDashboard(),
         routes: [
           GoRoute(
+            path: 'sessions',
+            builder: (context, state) => const SessionListScreen(),
+          ),
+          GoRoute(
+            path: 'sessions/:id',
+            builder: (context, state) {
+              final sessionId = state.pathParameters['id']!;
+              return SessionDetailScreen(sessionId: sessionId);
+            },
+          ),
+          GoRoute(
             path: 'live-session/:sessionId',
             builder: (context, state) {
               final sessionId = state.pathParameters['sessionId']!;
@@ -167,6 +184,40 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                 isTutor: false,
               );
             },
+          ),
+          GoRoute(
+            path: 'sessions/:id/live',
+            builder: (context, state) {
+              final sessionId = state.pathParameters['id']!;
+              final studentId = supabase.auth.currentUser!.id;
+              final tutorId =
+                  (state.extra as Map<String, dynamic>)['tutorId'] as String;
+              return LiveSessionScreen(
+                sessionId: sessionId,
+                tutorId: tutorId,
+                studentId: studentId,
+                isTutor: false,
+              );
+            },
+          ),
+          GoRoute(
+            path: 'assignments',
+            builder: (context, state) => const AssignmentListScreen(),
+          ),
+          GoRoute(
+            path: 'assignments/:id',
+            builder: (context, state) {
+              final assignmentId = state.pathParameters['id']!;
+              return AssignmentDetailScreen(assignmentId: assignmentId);
+            },
+          ),
+          GoRoute(
+            path: 'tutors',
+            builder: (context, state) => const TutorListScreen(),
+          ),
+          GoRoute(
+            path: 'progress',
+            builder: (context, state) => const ProgressScreen(),
           ),
           ...chatRoutes,
         ],

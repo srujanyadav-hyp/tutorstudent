@@ -6,10 +6,10 @@ class SearchFilterDialog extends StatefulWidget {
   final Map<String, dynamic> currentFilters;
 
   const SearchFilterDialog({
-    Key? key,
+    super.key,
     required this.category,
     required this.currentFilters,
-  }) : super(key: key);
+  });
 
   @override
   State<SearchFilterDialog> createState() => _SearchFilterDialogState();

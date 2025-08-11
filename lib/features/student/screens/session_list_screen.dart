@@ -15,17 +15,35 @@ class SessionListScreen extends ConsumerWidget {
       return const Scaffold(body: Center(child: Text('Not authenticated')));
     }
 
-    final sessionsAsync = ref.watch(upcomingSessionsProvider(user.id));
+    final sessionsAsync = ref.watch(upcomingSessionsFilteredProvider(user.id));
 
     return StudentScaffold(
       title: 'My Sessions',
       currentIndex: 2,
       actions: [
-        IconButton(
+        PopupMenuButton<String>(
           icon: const Icon(Icons.filter_list),
-          onPressed: () {
-            // TODO: Implement session filtering
+          onSelected: (value) {
+            switch (value) {
+              case 'all':
+                ref.read(sessionFilterProvider.notifier).state =
+                    SessionFilter.all;
+                break;
+              case 'upcoming':
+                ref.read(sessionFilterProvider.notifier).state =
+                    SessionFilter.upcoming;
+                break;
+              case 'live':
+                ref.read(sessionFilterProvider.notifier).state =
+                    SessionFilter.live;
+                break;
+            }
           },
+          itemBuilder: (context) => const [
+            PopupMenuItem(value: 'all', child: Text('All')),
+            PopupMenuItem(value: 'upcoming', child: Text('Upcoming')),
+            PopupMenuItem(value: 'live', child: Text('Live')),
+          ],
         ),
       ],
       body: sessionsAsync.when(

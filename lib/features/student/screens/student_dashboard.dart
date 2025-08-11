@@ -30,7 +30,7 @@ class StudentDashboard extends ConsumerWidget {
         IconButton(
           icon: const Icon(Icons.person),
           onPressed: () {
-            // TODO: Navigate to profile screen
+            GoRouter.of(context).go('/profile');
           },
         ),
       ],
@@ -67,7 +67,7 @@ class StudentDashboard extends ConsumerWidget {
       physics: const NeverScrollableScrollPhysics(),
       mainAxisSpacing: 16,
       crossAxisSpacing: 16,
-      childAspectRatio: 1.5,
+      childAspectRatio: 1.2,
       children: [
         _buildStatCard(
           'Total Sessions',
@@ -106,20 +106,28 @@ class StudentDashboard extends ConsumerWidget {
     return Card(
       elevation: 2,
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(12),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, color: color, size: 32),
-            const SizedBox(height: 8),
-            Text(title, style: const TextStyle(color: Colors.grey)),
-            const SizedBox(height: 4),
+            Icon(icon, color: color, size: 28),
+            const SizedBox(height: 6),
             Text(
-              value,
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: color,
+              title,
+              style: const TextStyle(color: Colors.grey),
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 4),
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                value,
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: color,
+                ),
               ),
             ),
           ],

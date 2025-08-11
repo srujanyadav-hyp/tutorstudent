@@ -114,3 +114,86 @@ class StudentNotifier extends StateNotifier<AsyncValue<void>> {
     }
   }
 }
+
+// Filtering state and derived providers
+
+enum SessionFilter { all, upcoming, live }
+
+final sessionFilterProvider = StateProvider<SessionFilter>(
+  (ref) => SessionFilter.all,
+);
+
+final upcomingSessionsFilteredProvider =
+    Provider.family<AsyncValue<List<Map<String, dynamic>>>, String>((
+      ref,
+      studentId,
+    ) {
+      final filter = ref.watch(sessionFilterProvider);
+      final sessionsAsync = ref.watch(upcomingSessionsProvider(studentId));
+      return sessionsAsync.whenData((sessions) {
+        final now = DateTime.now();
+        return sessions.where((s) {
+          try {
+            final when = DateTime.parse(s['scheduled_at'] as String);
+            final isLive =
+                when.isBefore(now) &&
+                when.add(const Duration(hours: 1)).isAfter(now);
+            final isUpcoming = when.isAfter(now);
+            switch (filter) {
+              case SessionFilter.all:
+                return true;
+              case SessionFilter.upcoming:
+                return isUpcoming;
+              case SessionFilter.live:
+                return isLive;
+            }
+          } catch (_) {
+            return true;
+          }
+        }).toList();
+      });
+    });
+
+enum AssignmentFilter { all, pending, submitted }
+
+final assignmentFilterProvider = StateProvider<AssignmentFilter>(
+  (ref) => AssignmentFilter.all,
+);
+
+final assignmentsFilteredProvider =
+    Provider.family<AsyncValue<List<Map<String, dynamic>>>, String>((
+      ref,
+      studentId,
+    ) {
+      final filter = ref.watch(assignmentFilterProvider);
+      final assignmentsAsync = ref.watch(assignmentsProvider(studentId));
+      return assignmentsAsync.whenData((assignments) {
+        return assignments.where((a) {
+          final submittedAt = a['submitted_at'];
+          switch (filter) {
+            case AssignmentFilter.all:
+              return true;
+            case AssignmentFilter.pending:
+              return submittedAt == null;
+            case AssignmentFilter.submitted:
+              return submittedAt != null;
+          }
+        }).toList();
+      });
+    });
+
+final tutorSearchQueryProvider = StateProvider<String>((ref) => '');
+
+final availableTutorsFilteredProvider =
+    Provider<AsyncValue<List<Map<String, dynamic>>>>((ref) {
+      final query = ref.watch(tutorSearchQueryProvider).trim().toLowerCase();
+      final tutorsAsync = ref.watch(availableTutorsProvider);
+      return tutorsAsync.whenData((tutors) {
+        if (query.isEmpty) return tutors;
+        return tutors.where((t) {
+          final name = (t['full_name'] ?? '').toString().toLowerCase();
+          final bio = (t['bio'] ?? '').toString().toLowerCase();
+          return name.contains(query) || bio.contains(query);
+        }).toList();
+      });
+    });

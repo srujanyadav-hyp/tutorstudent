@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 class SessionCard extends StatelessWidget {
   final Map<String, dynamic> session;
 
-  const SessionCard({Key? key, required this.session}) : super(key: key);
+  const SessionCard({super.key, required this.session});
 
   @override
   Widget build(BuildContext context) {
@@ -16,8 +16,8 @@ class SessionCard extends StatelessWidget {
       margin: const EdgeInsets.symmetric(vertical: 8.0),
       child: ListTile(
         leading: CircleAvatar(
-          child: Icon(_getStatusIcon(session['status']), color: Colors.white),
           backgroundColor: _getStatusColor(session['status']),
+          child: Icon(_getStatusIcon(session['status']), color: Colors.white),
         ),
         title: Text(session['title'] ?? 'Untitled Session'),
         subtitle: Column(
