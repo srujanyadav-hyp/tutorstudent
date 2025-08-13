@@ -61,37 +61,82 @@ class StudentDashboard extends ConsumerWidget {
   }
 
   Widget _buildStatCards(StudentDashboardStats stats) {
-    return GridView.count(
-      crossAxisCount: 2,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      mainAxisSpacing: 16,
-      crossAxisSpacing: 16,
-      childAspectRatio: 1.2,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildStatCard(
-          'Total Sessions',
-          stats.totalSessions.toString(),
-          Icons.calendar_today,
-          Colors.blue,
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Your Progress',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey.shade800,
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.blue.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: Colors.blue.withValues(alpha: 0.3)),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.trending_up, size: 16, color: Colors.blue),
+                  const SizedBox(width: 4),
+                  Text(
+                    '${(stats.averageScore * 100).round()}%',
+                    style: TextStyle(
+                      color: Colors.blue,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
-        _buildStatCard(
-          'Upcoming',
-          stats.upcomingSessions.toString(),
-          Icons.upcoming,
-          Colors.orange,
-        ),
-        _buildStatCard(
-          'Completed Assignments',
-          stats.completedAssignments.toString(),
-          Icons.assignment_turned_in,
-          Colors.green,
-        ),
-        _buildStatCard(
-          'Average Score',
-          '${(stats.averageScore * 100).round()}%',
-          Icons.score,
-          Colors.purple,
+        const SizedBox(height: 16),
+        GridView.count(
+          crossAxisCount: 2,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          mainAxisSpacing: 16,
+          crossAxisSpacing: 16,
+          childAspectRatio: 1.2,
+          children: [
+            _buildStatCard(
+              'Total Sessions',
+              stats.totalSessions.toString(),
+              Icons.calendar_today,
+              Colors.blue,
+              subtitle: 'Learning journey',
+            ),
+            _buildStatCard(
+              'Upcoming',
+              stats.upcomingSessions.toString(),
+              Icons.upcoming,
+              Colors.orange,
+              subtitle: 'Next sessions',
+            ),
+            _buildStatCard(
+              'Completed',
+              stats.completedAssignments.toString(),
+              Icons.assignment_turned_in,
+              Colors.green,
+              subtitle: 'Assignments done',
+            ),
+            _buildStatCard(
+              'Performance',
+              '${(stats.averageScore * 100).round()}%',
+              Icons.score,
+              Colors.purple,
+              subtitle: 'Average score',
+            ),
+          ],
         ),
       ],
     );
@@ -101,36 +146,69 @@ class StudentDashboard extends ConsumerWidget {
     String title,
     String value,
     IconData icon,
-    Color color,
-  ) {
+    Color color, {
+    String? subtitle,
+  }) {
     return Card(
-      elevation: 2,
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, color: color, size: 28),
-            const SizedBox(height: 6),
-            Text(
-              title,
-              style: const TextStyle(color: Colors.grey),
-              overflow: TextOverflow.ellipsis,
-            ),
-            const SizedBox(height: 4),
-            FittedBox(
-              fit: BoxFit.scaleDown,
-              child: Text(
+      elevation: 3,
+      shadowColor: color.withValues(alpha: 0.3),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: color.withValues(alpha: 0.1)),
+      ),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              color.withValues(alpha: 0.05),
+              color.withValues(alpha: 0.1),
+            ],
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(icon, color: color, size: 24),
+              ),
+              const SizedBox(height: 12),
+              Text(
                 value,
                 style: TextStyle(
-                  fontSize: 22,
+                  fontSize: 24,
                   fontWeight: FontWeight.bold,
                   color: color,
                 ),
               ),
-            ),
-          ],
+              const SizedBox(height: 4),
+              Text(
+                title,
+                style: TextStyle(
+                  color: Colors.grey.shade700,
+                  fontWeight: FontWeight.w600,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              if (subtitle != null) ...[
+                const SizedBox(height: 4),
+                Text(
+                  subtitle,
+                  style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ],
+          ),
         ),
       ),
     );
@@ -138,17 +216,39 @@ class StudentDashboard extends ConsumerWidget {
 
   Widget _buildProgressChart(StudentDashboardStats stats) {
     return Card(
-      elevation: 2,
+      elevation: 3,
+      shadowColor: Colors.blue.withValues(alpha: 0.3),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: Colors.blue.withValues(alpha: 0.1)),
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Progress Trend',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(Icons.trending_up, color: Colors.blue, size: 20),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  'Progress Trend',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey.shade800,
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
             SizedBox(
               height: 200,
               child: LineChart(
@@ -167,11 +267,11 @@ class StudentDashboard extends ConsumerWidget {
                       ),
                       isCurved: true,
                       color: Colors.blue,
-                      barWidth: 3,
+                      barWidth: 4,
                       dotData: FlDotData(show: false),
                       belowBarData: BarAreaData(
                         show: true,
-                        color: Colors.blue.withOpacity(0.1),
+                        color: Colors.blue.withValues(alpha: 0.1),
                       ),
                     ),
                   ],
@@ -194,24 +294,94 @@ class StudentDashboard extends ConsumerWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
-              'Upcoming Sessions',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.orange.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    Icons.calendar_today,
+                    color: Colors.orange,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Upcoming Sessions',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey.shade800,
+                      ),
+                    ),
+                    Text(
+                      'Your next learning sessions',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
-            TextButton(
+            TextButton.icon(
               onPressed: () => GoRouter.of(context).go('/student/sessions'),
-              child: const Text('View All'),
+              icon: Icon(Icons.arrow_forward_ios, size: 16),
+              label: const Text('View All'),
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.orange,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+              ),
             ),
           ],
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 16),
         sessionsAsync.when(
           data: (sessions) {
             if (sessions.isEmpty) {
-              return const Card(
-                child: Padding(
-                  padding: EdgeInsets.all(16),
-                  child: Text('No upcoming sessions'),
+              return Container(
+                padding: const EdgeInsets.all(32),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade50,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: Colors.grey.shade200),
+                ),
+                child: Column(
+                  children: [
+                    Icon(
+                      Icons.calendar_today_outlined,
+                      size: 48,
+                      color: Colors.grey.shade400,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'No upcoming sessions',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Book a session with your tutor to get started',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey.shade500,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
                 ),
               );
             }

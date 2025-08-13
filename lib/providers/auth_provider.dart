@@ -48,8 +48,7 @@ UserRole _getUserRoleFromString(String? value) {
       return UserRole.tutor;
     case 'student':
       return UserRole.student;
-    case 'parent':
-      return UserRole.parent;
+
     default:
       return UserRole.student; // Default to student as a fallback
   }

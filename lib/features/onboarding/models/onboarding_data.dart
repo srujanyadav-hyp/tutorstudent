@@ -69,31 +69,3 @@ class StudentOnboardingData extends OnboardingData {
     ),
   ];
 }
-
-class ParentOnboardingData extends OnboardingData {
-  ParentOnboardingData({
-    required super.title,
-    required super.description,
-    required super.imageAsset,
-    super.additionalData,
-  });
-
-  static List<OnboardingData> items = [
-    OnboardingData(
-      title: 'Welcome to TutorConnect',
-      description: 'Monitor and support your child\'s learning journey.',
-      imageAsset: 'assets/images/parent_welcome.png',
-    ),
-    OnboardingData(
-      title: 'Track Performance',
-      description: 'Stay updated with your child\'s progress and achievements.',
-      imageAsset: 'assets/images/parent_track.png',
-    ),
-    OnboardingData(
-      title: 'Connect with Tutors',
-      description:
-          'Communicate directly with tutors and stay involved in your child\'s education.',
-      imageAsset: 'assets/images/parent_connect.png',
-    ),
-  ];
-}

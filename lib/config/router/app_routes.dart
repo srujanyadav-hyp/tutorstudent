@@ -17,7 +17,7 @@ import '../../features/student/screens/assignment_list_screen.dart';
 import '../../features/student/screens/assignment_detail_screen.dart';
 import '../../features/student/screens/tutor_list_screen.dart';
 import '../../features/student/screens/progress_screen.dart';
-import '../../features/parent/screens/parent_dashboard.dart';
+
 import '../../features/tutor/models/student_management.dart';
 import '../../features/tutor/screens/student_detail_screen.dart';
 import '../../models/user_role.dart';
@@ -46,8 +46,8 @@ String? _getRedirectLocation(
           return '/tutor';
         case UserRole.student:
           return '/student';
-        case UserRole.parent:
-          return '/parent';
+        default:
+          return '/student'; // Default fallback
       }
     }
     return null;
@@ -56,9 +56,7 @@ String? _getRedirectLocation(
   // For non-authenticated users
   if (!isAuth) {
     // Protect dashboard routes
-    if (location.startsWith('/tutor') ||
-        location.startsWith('/student') ||
-        location.startsWith('/parent')) {
+    if (location.startsWith('/tutor') || location.startsWith('/student')) {
       return '/login';
     }
 
@@ -221,10 +219,6 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           ),
           ...chatRoutes,
         ],
-      ),
-      GoRoute(
-        path: '/parent',
-        builder: (context, state) => const ParentDashboard(),
       ),
 
       // Profile Route

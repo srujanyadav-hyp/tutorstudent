@@ -30,7 +30,7 @@ class OnboardingScreen extends StatelessWidget {
               ),
               const SizedBox(height: 20),
               const Text(
-                'Manage your tutoring life with ease. Students, tutors, and parents — all in one place.',
+                'Manage your tutoring life with ease. Students and tutors — all in one place.',
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 16),
               ),

@@ -1,1 +1,1 @@
-enum UserRole { tutor, student, parent }
+enum UserRole { tutor, student }

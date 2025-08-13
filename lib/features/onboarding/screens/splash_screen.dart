@@ -49,8 +49,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
             case 'student':
               context.go('/student');
               break;
-            case 'parent':
-              context.go('/parent');
+
               break;
             default:
               context.go('/onboarding');

@@ -3,10 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/providers/supabase_provider.dart';
 import '../providers/profile_provider.dart';
 import '../widgets/profile_image_picker.dart';
 import '../widgets/profile_info_form.dart';
+import '../../../providers/role_provider.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -28,6 +30,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     _phoneController.dispose();
     _bioController.dispose();
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeControllers();
   }
 
   Future<void> _pickImage() async {
@@ -55,7 +63,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final profileAsync = ref.read(profileProvider);
     profileAsync.whenData((profile) {
       if (profile != null) {
-        _nameController.text = profile.fullName;
+        _nameController.text = profile.fullName ?? '';
         _phoneController.text = profile.phone ?? '';
         _bioController.text = profile.bio ?? '';
       }
@@ -68,9 +76,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         await ref
             .read(profileProvider.notifier)
             .updateProfile(
-              fullName: _nameController.text,
-              phone: _phoneController.text,
-              bio: _bioController.text,
+              fullName: _nameController.text.trim(),
+              phone: _phoneController.text.trim(),
+              bio: _bioController.text.trim(),
             );
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -84,6 +92,24 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             SnackBar(content: Text('Failed to update profile: $e')),
           );
         }
+      }
+    }
+  }
+
+  Future<void> _handleLogout() async {
+    try {
+      // Clear the user role from the provider
+      await ref.read(userRoleProvider.notifier).clearRole();
+
+      // Navigate to login page
+      if (context.mounted) {
+        context.go('/login');
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error during logout: $e')));
       }
     }
   }
@@ -116,7 +142,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     TextButton(
                       onPressed: () {
                         Navigator.pop(context);
-                        ref.read(supabaseServiceProvider).client.auth.signOut();
+                        _handleLogout();
                       },
                       style: TextButton.styleFrom(foregroundColor: Colors.red),
                       child: const Text('LOGOUT'),
@@ -171,11 +197,5 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             )
           : null,
     );
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _initializeControllers();
   }
 }

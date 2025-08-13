@@ -1,64 +1,71 @@
-import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../models/payment.dart';
-import 'base_service.dart';
+import 'package:flutter/material.dart';
+import 'package:razorpay_flutter/razorpay_flutter.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-class PaymentService extends BaseService {
-  PaymentService(SupabaseClient client) : super(client, 'payments');
+final paymentServiceProvider = Provider<PaymentService>((ref) {
+  final razorpayKey = dotenv.env['RAZORPAY_KEY']!;
+  return PaymentService(razorpayKey);
+});
 
-  Future<List<Payment>> getUserPayments(String userId) async {
-    final response = await table
-        .select()
-        .or('student_id.eq.$userId,tutor_id.eq.$userId')
-        .order('payment_date', ascending: false);
-    return response.map((json) => Payment.fromJson(json)).toList();
+class PaymentService {
+  final Razorpay _razorpay = Razorpay();
+  final String _razorpayKey;
+
+  // Add callbacks for payment events
+  Function(PaymentSuccessResponse)? onPaymentSuccess;
+  Function(PaymentFailureResponse)? onPaymentError;
+  Function(ExternalWalletResponse)? onExternalWallet;
+
+  PaymentService(this._razorpayKey) {
+    _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
+    _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
+    _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
   }
 
-  Future<List<Payment>> getTutorPayments(String tutorId) async {
-    final response = await table
-        .select()
-        .eq('tutor_id', tutorId)
-        .order('payment_date', ascending: false);
-    return response.map((json) => Payment.fromJson(json)).toList();
+  void openCheckout({
+    required int amount,
+    required String name,
+    required String description,
+    String? contact,
+    String? email,
+  }) {
+    var options = {
+      'key': _razorpayKey,
+      'amount': amount * 100, // Amount in paisa
+      'currency': 'INR',
+      'name': name,
+      'description': description,
+      'prefill': {'contact': contact ?? '', 'email': email ?? ''},
+      'external': {
+        'wallets': ['paytm', 'phonepe'],
+      },
+      'timeout': 300, // in seconds
+    };
+
+    try {
+      _razorpay.open(options);
+    } catch (e) {
+      debugPrint('Error: $e');
+    }
   }
 
-  Future<List<Payment>> getStudentPayments(String studentId) async {
-    final response = await table
-        .select()
-        .eq('student_id', studentId)
-        .order('payment_date', ascending: false);
-    return response.map((json) => Payment.fromJson(json)).toList();
+  void _handlePaymentSuccess(PaymentSuccessResponse response) {
+    debugPrint('SUCCESS: ${response.paymentId}');
+    onPaymentSuccess?.call(response);
   }
 
-  Future<Payment> createPayment({
-    required String studentId,
-    required String tutorId,
-    String? sessionId,
-    required double amount,
-    String currency = 'INR',
-    String? paymentMethod,
-  }) async {
-    final response = await table
-        .insert({
-          'student_id': studentId,
-          'tutor_id': tutorId,
-          'session_id': sessionId,
-          'amount': amount,
-          'currency': currency,
-          'status': PaymentStatus.pending.toString().split('.').last,
-          'payment_method': paymentMethod,
-          'payment_date': DateTime.now().toIso8601String(),
-        })
-        .select()
-        .single();
-    return Payment.fromJson(response);
+  void _handlePaymentError(PaymentFailureResponse response) {
+    debugPrint('ERROR: ${response.code} - ${response.message}');
+    onPaymentError?.call(response);
   }
 
-  Future<void> updatePaymentStatus(
-    String paymentId,
-    PaymentStatus status,
-  ) async {
-    await table
-        .update({'status': status.toString().split('.').last})
-        .eq('id', paymentId);
+  void _handleExternalWallet(ExternalWalletResponse response) {
+    debugPrint('EXTERNAL_WALLET: ${response.walletName}');
+    onExternalWallet?.call(response);
+  }
+
+  void dispose() {
+    _razorpay.clear();
   }
 }

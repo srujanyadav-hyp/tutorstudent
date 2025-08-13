@@ -95,8 +95,8 @@ class AuthController extends StateNotifier<bool> {
           case UserRole.student:
             context.go('/student');
             break;
-          case UserRole.parent:
-            context.go('/parent');
+          default:
+            context.go('/student');
             break;
         }
       }
@@ -151,8 +151,8 @@ class AuthController extends StateNotifier<bool> {
       return switch (response['role']) {
         'student' => UserRole.student,
         'tutor' => UserRole.tutor,
-        'parent' => UserRole.parent,
-        _ => throw 'Invalid user role'
+
+        _ => throw 'Invalid user role',
       };
     } catch (e) {
       throw 'Failed to get user role: ${e.toString()}';

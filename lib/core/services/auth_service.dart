@@ -91,8 +91,7 @@ class AuthService {
       case 'student':
         // Students will be linked to tutors later
         break;
-      case 'parent':
-        // Parents will be linked to students later
+
         break;
     }
   }

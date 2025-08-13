@@ -58,7 +58,7 @@ class StudentService {
         parentId: (studentData != null
             ? studentData['parent_id'] as String?
             : null),
-        tutorIds: (connections as List)
+        tutorIds: (connections)
             .map((conn) => conn['tutor_id'] as String)
             .toList(),
         subjectProgress: const <String, double>{},
@@ -150,6 +150,9 @@ class StudentService {
 
   Future<List<Map<String, dynamic>>> getAvailableTutors() async {
     try {
+      final currentUser = _supabase.auth.currentUser;
+      if (currentUser == null) throw 'User not authenticated';
+
       final response = await _supabase
           .from('user_profiles')
           .select('''
@@ -159,11 +162,34 @@ class StudentService {
             bio,
             profile_image,
             role_specific_data,
-            tutor_reviews:tutor_reviews!tutor_reviews_tutor_id_fkey(rating)
+            tutor_reviews:tutor_reviews!tutor_reviews_tutor_id_fkey(rating),
+            tutor_subjects:tutor_subjects!tutor_subjects_tutor_id_fkey(
+              subject_name,
+              grade_level,
+              hourly_rate
+            )
           ''')
           .eq('role', 'tutor');
 
-      return List<Map<String, dynamic>>.from(response);
+      final List<Map<String, dynamic>> tutors = List<Map<String, dynamic>>.from(
+        response,
+      );
+
+      // Check connection status for each tutor
+      for (final tutor in tutors) {
+        final connectionResponse = await _supabase
+            .from('student_tutor_connections')
+            .select('id, status')
+            .eq('tutor_id', tutor['id'])
+            .eq('student_id', currentUser.id)
+            .eq('status', 'active')
+            .maybeSingle();
+
+        tutor['is_connected'] = connectionResponse != null;
+        tutor['connection_id'] = connectionResponse?['id'];
+      }
+
+      return tutors;
     } catch (e) {
       throw 'Failed to get available tutors: ${e.toString()}';
     }

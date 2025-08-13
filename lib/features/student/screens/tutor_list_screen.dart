@@ -1,15 +1,74 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:razorpay_flutter/razorpay_flutter.dart';
 import '../../../core/providers/supabase_provider.dart';
+import '../../../core/services/payment_service.dart';
 import '../providers/student_provider.dart';
 import '../widgets/tutor_list_item.dart';
 import '../widgets/student_scaffold.dart';
 
-class TutorListScreen extends ConsumerWidget {
+class TutorListScreen extends ConsumerStatefulWidget {
   const TutorListScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<TutorListScreen> createState() => _TutorListScreenState();
+}
+
+class _TutorListScreenState extends ConsumerState<TutorListScreen> {
+  late PaymentService _paymentService;
+
+  @override
+  void initState() {
+    super.initState();
+    _paymentService = ref.read(paymentServiceProvider);
+    _paymentService.onPaymentSuccess = _handlePaymentSuccess;
+    _paymentService.onPaymentError = _handlePaymentError;
+    _paymentService.onExternalWallet = _handleExternalWallet;
+  }
+
+  @override
+  void dispose() {
+    _paymentService.dispose();
+    super.dispose();
+  }
+
+  void _handlePaymentSuccess(PaymentSuccessResponse response) {
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Payment Successful: ${response.paymentId}'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    }
+    // You can also trigger the connectWithTutor here if payment is successful
+    // _connectWithTutor();
+  }
+
+  void _handlePaymentError(PaymentFailureResponse response) {
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Payment Failed: ${response.message}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  void _handleExternalWallet(ExternalWalletResponse response) {
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('External Wallet: ${response.walletName}'),
+          backgroundColor: Colors.blueAccent,
+        ),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final user = ref.watch(supabaseServiceProvider).client.auth.currentUser;
     if (user == null) {
       return const Scaffold(body: Center(child: Text('Not authenticated')));
@@ -60,22 +119,43 @@ class TutorListScreen extends ConsumerWidget {
                   tutor: tutor,
                   onConnect: () async {
                     try {
-                      await ref
-                          .read(studentNotifierProvider(user.id).notifier)
-                          .connectWithTutor(tutor['id']);
+                      // Get the tutor's hourly rate from their subjects
+                      final tutorSubjects = tutor['tutor_subjects'] as List?;
+                      double hourlyRate = 500.0; // Default rate
 
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Successfully connected with tutor'),
-                          ),
-                        );
+                      if (tutorSubjects != null && tutorSubjects.isNotEmpty) {
+                        // Use the first available subject's hourly rate, or average if multiple
+                        final rates = tutorSubjects
+                            .where((subject) => subject['hourly_rate'] != null)
+                            .map(
+                              (subject) =>
+                                  (subject['hourly_rate'] as num).toDouble(),
+                            )
+                            .toList();
+
+                        if (rates.isNotEmpty) {
+                          hourlyRate =
+                              rates.reduce((a, b) => a + b) / rates.length;
+                        }
                       }
+
+                      // Convert hourly rate to connection fee (e.g., 1 hour worth)
+                      final int amount = (hourlyRate * 100)
+                          .round(); // Convert to paisa
+
+                      _paymentService.openCheckout(
+                        amount: amount,
+                        name: 'TutorConnect',
+                        description:
+                            'Connect with Tutor: ${tutor['full_name']} (₹${hourlyRate.toStringAsFixed(0)}/hr)',
+                        contact: user.phone,
+                        email: user.email,
+                      );
                     } catch (e) {
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: Text('Error: $e'),
+                            content: Text('Error initiating payment: $e'),
                             backgroundColor: Colors.red,
                           ),
                         );

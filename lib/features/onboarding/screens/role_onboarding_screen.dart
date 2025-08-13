@@ -31,8 +31,8 @@ class _RoleOnboardingScreenState extends ConsumerState<RoleOnboardingScreen> {
         return TutorOnboardingData.items;
       case UserRole.student:
         return StudentOnboardingData.items;
-      case UserRole.parent:
-        return ParentOnboardingData.items;
+      default:
+        return StudentOnboardingData.items;
     }
   }
 
@@ -51,8 +51,8 @@ class _RoleOnboardingScreenState extends ConsumerState<RoleOnboardingScreen> {
         case UserRole.student:
           context.go('/student');
           break;
-        case UserRole.parent:
-          context.go('/parent');
+        default:
+          context.go('/student');
           break;
       }
     }
@@ -67,8 +67,8 @@ class _RoleOnboardingScreenState extends ConsumerState<RoleOnboardingScreen> {
       case UserRole.student:
         context.go('/student');
         break;
-      case UserRole.parent:
-        context.go('/parent');
+      default:
+        context.go('/student');
         break;
     }
   }

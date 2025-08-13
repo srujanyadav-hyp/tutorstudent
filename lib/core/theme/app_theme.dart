@@ -23,12 +23,11 @@ class RoleTheme {
           backgroundColor: const Color(0xFFFFFAFA),
           secondaryColor: Colors.green.shade300,
         );
-
-      case UserRole.parent:
+      default:
         return _buildTheme(
-          seedColor: Colors.indigo,
-          backgroundColor: Colors.white,
-          secondaryColor: Colors.indigo.shade200,
+          seedColor: const Color(0xFF8B4513),
+          backgroundColor: const Color(0xFFFFF8DC),
+          secondaryColor: Colors.brown.shade300,
         );
     }
   }

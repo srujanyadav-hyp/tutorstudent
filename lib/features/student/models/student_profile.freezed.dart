@@ -25,13 +25,9 @@ mixin _$StudentProfile {
   String get email => throw _privateConstructorUsedError;
   String? get grade => throw _privateConstructorUsedError;
   List<String> get subjects => throw _privateConstructorUsedError;
-  @JsonKey(name: 'parent_id')
   String? get parentId => throw _privateConstructorUsedError;
-  @JsonKey(name: 'tutor_ids')
   List<String> get tutorIds => throw _privateConstructorUsedError;
-  @JsonKey(name: 'subject_progress')
   Map<String, double> get subjectProgress => throw _privateConstructorUsedError;
-  @JsonKey(name: 'created_at')
   DateTime get createdAt => throw _privateConstructorUsedError;
 
   /// Serializes this StudentProfile to a JSON map.
@@ -56,10 +52,10 @@ abstract class $StudentProfileCopyWith<$Res> {
       String email,
       String? grade,
       List<String> subjects,
-      @JsonKey(name: 'parent_id') String? parentId,
-      @JsonKey(name: 'tutor_ids') List<String> tutorIds,
-      @JsonKey(name: 'subject_progress') Map<String, double> subjectProgress,
-      @JsonKey(name: 'created_at') DateTime createdAt});
+      String? parentId,
+      List<String> tutorIds,
+      Map<String, double> subjectProgress,
+      DateTime createdAt});
 }
 
 /// @nodoc
@@ -142,10 +138,10 @@ abstract class _$$StudentProfileImplCopyWith<$Res>
       String email,
       String? grade,
       List<String> subjects,
-      @JsonKey(name: 'parent_id') String? parentId,
-      @JsonKey(name: 'tutor_ids') List<String> tutorIds,
-      @JsonKey(name: 'subject_progress') Map<String, double> subjectProgress,
-      @JsonKey(name: 'created_at') DateTime createdAt});
+      String? parentId,
+      List<String> tutorIds,
+      Map<String, double> subjectProgress,
+      DateTime createdAt});
 }
 
 /// @nodoc
@@ -213,7 +209,8 @@ class __$$StudentProfileImplCopyWithImpl<$Res>
 }
 
 /// @nodoc
-@JsonSerializable()
+
+@JsonSerializable(fieldRename: FieldRename.snake)
 class _$StudentProfileImpl implements _StudentProfile {
   const _$StudentProfileImpl(
       {required this.id,
@@ -221,11 +218,10 @@ class _$StudentProfileImpl implements _StudentProfile {
       required this.email,
       this.grade,
       required final List<String> subjects,
-      @JsonKey(name: 'parent_id') this.parentId,
-      @JsonKey(name: 'tutor_ids') required final List<String> tutorIds,
-      @JsonKey(name: 'subject_progress')
+      this.parentId,
+      required final List<String> tutorIds,
       required final Map<String, double> subjectProgress,
-      @JsonKey(name: 'created_at') required this.createdAt})
+      required this.createdAt})
       : _subjects = subjects,
         _tutorIds = tutorIds,
         _subjectProgress = subjectProgress;
@@ -250,11 +246,9 @@ class _$StudentProfileImpl implements _StudentProfile {
   }
 
   @override
-  @JsonKey(name: 'parent_id')
   final String? parentId;
   final List<String> _tutorIds;
   @override
-  @JsonKey(name: 'tutor_ids')
   List<String> get tutorIds {
     if (_tutorIds is EqualUnmodifiableListView) return _tutorIds;
     // ignore: implicit_dynamic_type
@@ -263,7 +257,6 @@ class _$StudentProfileImpl implements _StudentProfile {
 
   final Map<String, double> _subjectProgress;
   @override
-  @JsonKey(name: 'subject_progress')
   Map<String, double> get subjectProgress {
     if (_subjectProgress is EqualUnmodifiableMapView) return _subjectProgress;
     // ignore: implicit_dynamic_type
@@ -271,7 +264,6 @@ class _$StudentProfileImpl implements _StudentProfile {
   }
 
   @override
-  @JsonKey(name: 'created_at')
   final DateTime createdAt;
 
   @override
@@ -331,17 +323,15 @@ class _$StudentProfileImpl implements _StudentProfile {
 
 abstract class _StudentProfile implements StudentProfile {
   const factory _StudentProfile(
-          {required final String id,
-          required final String name,
-          required final String email,
-          final String? grade,
-          required final List<String> subjects,
-          @JsonKey(name: 'parent_id') final String? parentId,
-          @JsonKey(name: 'tutor_ids') required final List<String> tutorIds,
-          @JsonKey(name: 'subject_progress')
-          required final Map<String, double> subjectProgress,
-          @JsonKey(name: 'created_at') required final DateTime createdAt}) =
-      _$StudentProfileImpl;
+      {required final String id,
+      required final String name,
+      required final String email,
+      final String? grade,
+      required final List<String> subjects,
+      final String? parentId,
+      required final List<String> tutorIds,
+      required final Map<String, double> subjectProgress,
+      required final DateTime createdAt}) = _$StudentProfileImpl;
 
   factory _StudentProfile.fromJson(Map<String, dynamic> json) =
       _$StudentProfileImpl.fromJson;
@@ -357,16 +347,12 @@ abstract class _StudentProfile implements StudentProfile {
   @override
   List<String> get subjects;
   @override
-  @JsonKey(name: 'parent_id')
   String? get parentId;
   @override
-  @JsonKey(name: 'tutor_ids')
   List<String> get tutorIds;
   @override
-  @JsonKey(name: 'subject_progress')
   Map<String, double> get subjectProgress;
   @override
-  @JsonKey(name: 'created_at')
   DateTime get createdAt;
 
   /// Create a copy of StudentProfile

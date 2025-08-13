@@ -16,7 +16,7 @@ class SupabaseService {
             students!inner(*),
             class_sessions!tutor_id(*),
             assignments!tutor_id(*),
-            billing!parent_id(*)
+
           ''')
           .eq('id', user.id)
           .single();
@@ -100,7 +100,7 @@ class SupabaseService {
   Future<Map<String, dynamic>> createStudentProfile({
     required String studentId,
     String? tutorId,
-    String? parentId,
+
     String? grade,
     String? classCode,
   }) async {
@@ -110,7 +110,7 @@ class SupabaseService {
         params: {
           'p_user_id': studentId,
           'p_tutor_id': tutorId,
-          'p_parent_id': parentId,
+
           'p_grade': grade,
           'p_class_code': classCode,
         },

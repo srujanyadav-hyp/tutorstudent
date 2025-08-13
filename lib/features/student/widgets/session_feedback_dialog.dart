@@ -92,6 +92,9 @@ class _SessionFeedbackDialogState extends ConsumerState<SessionFeedbackDialog> {
                       _isSubmitting = true;
                     });
 
+                    final navigator = Navigator.of(context);
+                    final messenger = ScaffoldMessenger.of(context);
+
                     try {
                       await ref
                           .read(
@@ -110,23 +113,19 @@ class _SessionFeedbackDialogState extends ConsumerState<SessionFeedbackDialog> {
                             _feedback,
                           );
 
-                      if (mounted) {
-                        Navigator.pop(context);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Feedback submitted successfully'),
-                          ),
-                        );
-                      }
+                      navigator.pop();
+                      messenger.showSnackBar(
+                        const SnackBar(
+                          content: Text('Feedback submitted successfully'),
+                        ),
+                      );
                     } catch (e) {
-                      if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('Error: $e'),
-                            backgroundColor: Colors.red,
-                          ),
-                        );
-                      }
+                      messenger.showSnackBar(
+                        SnackBar(
+                          content: Text('Error: $e'),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
                     } finally {
                       if (mounted) {
                         setState(() {

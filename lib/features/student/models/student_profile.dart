@@ -3,6 +3,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'student_profile.freezed.dart';
 part 'student_profile.g.dart';
 
+@JsonSerializable(fieldRename: FieldRename.snake)
 @freezed
 class StudentProfile with _$StudentProfile {
   const factory StudentProfile({
@@ -11,11 +12,10 @@ class StudentProfile with _$StudentProfile {
     required String email,
     String? grade,
     required List<String> subjects,
-    @JsonKey(name: 'parent_id') String? parentId,
-    @JsonKey(name: 'tutor_ids') required List<String> tutorIds,
-    @JsonKey(name: 'subject_progress')
+    String? parentId,
+    required List<String> tutorIds,
     required Map<String, double> subjectProgress,
-    @JsonKey(name: 'created_at') required DateTime createdAt,
+    required DateTime createdAt,
   }) = _StudentProfile;
 
   factory StudentProfile.fromJson(Map<String, dynamic> json) =>

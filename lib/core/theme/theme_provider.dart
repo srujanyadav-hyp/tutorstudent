@@ -50,8 +50,8 @@ class AppThemeProvider {
         return const Color(0xFF8B4513);
       case UserRole.tutor:
         return const Color(0xFF90EE90);
-      case UserRole.parent:
-        return Colors.indigo;
+      default:
+        return const Color(0xFF8B4513);
     }
   }
 
@@ -61,8 +61,8 @@ class AppThemeProvider {
         return const Color(0xFFFFF8DC);
       case UserRole.tutor:
         return const Color(0xFFFFFAFA);
-      case UserRole.parent:
-        return Colors.white;
+      default:
+        return const Color(0xFFFFF8DC);
     }
   }
 }
