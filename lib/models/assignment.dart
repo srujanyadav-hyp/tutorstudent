@@ -27,14 +27,13 @@ class Assignment extends BaseModel {
   @override
   Map<String, dynamic> toJson() => _$AssignmentToJson(this);
 
-  @override
   Map<String, dynamic> toMap() => {
-        'id': id,
-        'tutor_id': tutorId,
-        'title': title,
-        'description': description,
-        'due_date': dueDate?.toIso8601String(),
-        'subject': subject,
-        'created_at': createdAt.toIso8601String(),
-      };
+    'id': id,
+    'tutor_id': tutorId,
+    'title': title,
+    'description': description,
+    'due_date': dueDate?.toIso8601String(),
+    'subject': subject,
+    'created_at': createdAt.toIso8601String(),
+  };
 }

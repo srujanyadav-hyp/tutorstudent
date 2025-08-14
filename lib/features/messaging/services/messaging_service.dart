@@ -2,7 +2,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/chat_message.dart';
 
 class MessagingService {
-  final _supabase = Supabase.instance.client;
   final SupabaseClient _client = Supabase.instance.client;
 
   Stream<List<ChatMessage>> getChatMessages(String otherUserId) {

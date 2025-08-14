@@ -39,7 +39,7 @@ class RoleTheme {
   }) {
     final colorScheme = ColorScheme.fromSeed(
       seedColor: seedColor,
-      background: backgroundColor,
+      surface: backgroundColor,
     ).copyWith(secondary: secondaryColor);
 
     return ThemeData(
@@ -83,7 +83,9 @@ class RoleTheme {
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide.none,
         ),
-        hintStyle: TextStyle(color: colorScheme.onSurface.withOpacity(0.6)),
+        hintStyle: TextStyle(
+          color: colorScheme.onSurface.withValues(alpha: 0.6),
+        ),
         labelStyle: TextStyle(color: colorScheme.onSurface),
       ),
     );

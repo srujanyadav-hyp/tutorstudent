@@ -27,14 +27,13 @@ class AssignmentSubmission extends BaseModel {
   @override
   Map<String, dynamic> toJson() => _$AssignmentSubmissionToJson(this);
 
-  @override
   Map<String, dynamic> toMap() => {
-        'id': id,
-        'assignment_id': assignmentId,
-        'student_id': studentId,
-        'file_url': fileUrl,
-        'feedback': feedback,
-        'grade': grade,
-        'created_at': createdAt.toIso8601String(),
-      };
+    'id': id,
+    'assignment_id': assignmentId,
+    'student_id': studentId,
+    'file_url': fileUrl,
+    'feedback': feedback,
+    'grade': grade,
+    'created_at': createdAt.toIso8601String(),
+  };
 }

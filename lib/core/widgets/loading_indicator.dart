@@ -40,7 +40,7 @@ class LoadingOverlay extends StatelessWidget {
         if (isLoading)
           Positioned.fill(
             child: Container(
-              color: barrierColor ?? Colors.black.withOpacity(0.5),
+              color: barrierColor ?? Colors.black.withValues(alpha: 0.5),
               child: LoadingIndicator(size: indicatorSize),
             ),
           ),

@@ -117,7 +117,7 @@ class StudentNotifier extends StateNotifier<AsyncValue<void>> {
 
 // Filtering state and derived providers
 
-enum SessionFilter { all, upcoming, live }
+enum SessionFilter { all, upcoming, live, completed, cancelled }
 
 final sessionFilterProvider = StateProvider<SessionFilter>(
   (ref) => SessionFilter.all,
@@ -139,6 +139,9 @@ final upcomingSessionsFilteredProvider =
                 when.isBefore(now) &&
                 when.add(const Duration(hours: 1)).isAfter(now);
             final isUpcoming = when.isAfter(now);
+            final isCompleted = s['status'] == 'completed';
+            final isCancelled = s['status'] == 'cancelled';
+
             switch (filter) {
               case SessionFilter.all:
                 return true;
@@ -146,6 +149,10 @@ final upcomingSessionsFilteredProvider =
                 return isUpcoming;
               case SessionFilter.live:
                 return isLive;
+              case SessionFilter.completed:
+                return isCompleted;
+              case SessionFilter.cancelled:
+                return isCancelled;
             }
           } catch (_) {
             return true;
@@ -154,7 +161,7 @@ final upcomingSessionsFilteredProvider =
       });
     });
 
-enum AssignmentFilter { all, pending, submitted }
+enum AssignmentFilter { all, pending, submitted, overdue }
 
 final assignmentFilterProvider = StateProvider<AssignmentFilter>(
   (ref) => AssignmentFilter.all,
@@ -170,6 +177,14 @@ final assignmentsFilteredProvider =
       return assignmentsAsync.whenData((assignments) {
         return assignments.where((a) {
           final submittedAt = a['submitted_at'];
+          final dueDate = a['due_date'] != null
+              ? DateTime.parse(a['due_date'] as String)
+              : null;
+          final isOverdue =
+              dueDate != null &&
+              dueDate.isBefore(DateTime.now()) &&
+              submittedAt == null;
+
           switch (filter) {
             case AssignmentFilter.all:
               return true;
@@ -177,6 +192,8 @@ final assignmentsFilteredProvider =
               return submittedAt == null;
             case AssignmentFilter.submitted:
               return submittedAt != null;
+            case AssignmentFilter.overdue:
+              return isOverdue;
           }
         }).toList();
       });

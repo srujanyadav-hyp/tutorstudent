@@ -50,12 +50,15 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(15),
             borderSide: BorderSide(
-                color: Theme.of(context).primaryColor.withOpacity(0.5)),
+              color: Theme.of(context).primaryColor.withValues(alpha: 0.5),
+            ),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(15),
-            borderSide:
-                BorderSide(color: Theme.of(context).primaryColor, width: 2),
+            borderSide: BorderSide(
+              color: Theme.of(context).primaryColor,
+              width: 2,
+            ),
           ),
           errorBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(15),
@@ -69,7 +72,9 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
               ? IconButton(
                   icon: Icon(
                     _obscureText ? Icons.visibility_off : Icons.visibility,
-                    color: Theme.of(context).primaryColor.withOpacity(0.7),
+                    color: Theme.of(
+                      context,
+                    ).primaryColor.withValues(alpha: 0.7),
                   ),
                   onPressed: () {
                     setState(() {
@@ -78,8 +83,10 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
                   },
                 )
               : null,
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 16,
+          ),
         ),
       ),
     );

@@ -63,9 +63,11 @@ class _LiveSessionScreenState extends ConsumerState<LiveSessionScreen> {
 
       setState(() => _isLoading = false);
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error: ${e.toString()}')));
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: ${e.toString()}')));
+      }
     }
   }
 
@@ -114,9 +116,11 @@ class _LiveSessionScreenState extends ConsumerState<LiveSessionScreen> {
                       .endSession(_liveSession!.id);
                   if (mounted) Navigator.pop(context);
                 } catch (e) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Error: ${e.toString()}')),
-                  );
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Error: ${e.toString()}')),
+                    );
+                  }
                 }
               },
             ),

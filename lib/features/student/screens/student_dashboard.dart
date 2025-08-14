@@ -30,7 +30,7 @@ class StudentDashboard extends ConsumerWidget {
         IconButton(
           icon: const Icon(Icons.person),
           onPressed: () {
-            GoRouter.of(context).go('/profile');
+            GoRouter.of(context).go('/student/profile');
           },
         ),
       ],
@@ -44,6 +44,8 @@ class StudentDashboard extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildStatCards(stats),
+                const SizedBox(height: 24),
+                _buildQuickActions(context),
                 const SizedBox(height: 24),
                 _buildProgressChart(stats),
                 const SizedBox(height: 24),
@@ -106,7 +108,7 @@ class StudentDashboard extends ConsumerWidget {
           physics: const NeverScrollableScrollPhysics(),
           mainAxisSpacing: 16,
           crossAxisSpacing: 16,
-          childAspectRatio: 1.2,
+          childAspectRatio: 1.1,
           children: [
             _buildStatCard(
               'Total Sessions',
@@ -114,6 +116,9 @@ class StudentDashboard extends ConsumerWidget {
               Icons.calendar_today,
               Colors.blue,
               subtitle: 'Learning journey',
+              onTap: () {
+                // TODO: Navigate to sessions history
+              },
             ),
             _buildStatCard(
               'Upcoming',
@@ -121,6 +126,9 @@ class StudentDashboard extends ConsumerWidget {
               Icons.upcoming,
               Colors.orange,
               subtitle: 'Next sessions',
+              onTap: () {
+                // TODO: Navigate to upcoming sessions
+              },
             ),
             _buildStatCard(
               'Completed',
@@ -128,6 +136,9 @@ class StudentDashboard extends ConsumerWidget {
               Icons.assignment_turned_in,
               Colors.green,
               subtitle: 'Assignments done',
+              onTap: () {
+                // TODO: Navigate to completed assignments
+              },
             ),
             _buildStatCard(
               'Performance',
@@ -135,6 +146,9 @@ class StudentDashboard extends ConsumerWidget {
               Icons.score,
               Colors.purple,
               subtitle: 'Average score',
+              onTap: () {
+                // TODO: Navigate to performance analytics
+              },
             ),
           ],
         ),
@@ -148,66 +162,78 @@ class StudentDashboard extends ConsumerWidget {
     IconData icon,
     Color color, {
     String? subtitle,
+    VoidCallback? onTap,
   }) {
-    return Card(
-      elevation: 3,
-      shadowColor: color.withValues(alpha: 0.3),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: color.withValues(alpha: 0.1)),
-      ),
-      child: Container(
-        decoration: BoxDecoration(
+    return GestureDetector(
+      onTap: onTap,
+      child: Card(
+        elevation: 3,
+        shadowColor: color.withValues(alpha: 0.3),
+        shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              color.withValues(alpha: 0.05),
-              color.withValues(alpha: 0.1),
-            ],
-          ),
+          side: BorderSide(color: color.withValues(alpha: 0.1)),
         ),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                color.withValues(alpha: 0.05),
+                color.withValues(alpha: 0.1),
+              ],
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(icon, color: color, size: 24),
                 ),
-                child: Icon(icon, color: color, size: 24),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                value,
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: color,
+                const SizedBox(height: 12),
+                Text(
+                  value,
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: color,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                title,
-                style: TextStyle(
-                  color: Colors.grey.shade700,
-                  fontWeight: FontWeight.w600,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              if (subtitle != null) ...[
                 const SizedBox(height: 4),
                 Text(
-                  subtitle,
-                  style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
+                  title,
+                  style: TextStyle(
+                    color: Colors.grey.shade700,
+                    fontWeight: FontWeight.w600,
+                  ),
                   textAlign: TextAlign.center,
                 ),
+                if (subtitle != null) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    subtitle,
+                    style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+                if (onTap != null) ...[
+                  const SizedBox(height: 8),
+                  Icon(
+                    Icons.arrow_forward_ios,
+                    size: 16,
+                    color: color.withValues(alpha: 0.6),
+                  ),
+                ],
               ],
-            ],
+            ),
           ),
         ),
       ),
@@ -443,6 +469,128 @@ class StudentDashboard extends ConsumerWidget {
           error: (error, _) => Text('Error: $error'),
         ),
       ],
+    );
+  }
+
+  Widget _buildQuickActions(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Quick Actions',
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.grey.shade800,
+          ),
+        ),
+        const SizedBox(height: 16),
+        Row(
+          children: [
+            Expanded(
+              child: _buildQuickActionCard(
+                context,
+                'Book Session',
+                Icons.calendar_today,
+                Colors.blue,
+                () => GoRouter.of(context).go('/student/book-session'),
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: _buildQuickActionCard(
+                context,
+                'Find Tutor',
+                Icons.search,
+                Colors.green,
+                () => GoRouter.of(context).go('/student/search-tutors'),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        Row(
+          children: [
+            Expanded(
+              child: _buildQuickActionCard(
+                context,
+                'Submit Assignment',
+                Icons.assignment,
+                Colors.orange,
+                () => GoRouter.of(context).go('/student/assignments'),
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: _buildQuickActionCard(
+                context,
+                'View Progress',
+                Icons.trending_up,
+                Colors.purple,
+                () => GoRouter.of(context).go('/student/progress'),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildQuickActionCard(
+    BuildContext context,
+    String title,
+    IconData icon,
+    Color color,
+    VoidCallback onTap,
+  ) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Card(
+        elevation: 2,
+        shadowColor: color.withValues(alpha: 0.2),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(color: color.withValues(alpha: 0.1)),
+        ),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                color.withValues(alpha: 0.05),
+                color.withValues(alpha: 0.1),
+              ],
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Icon(icon, color: color, size: 28),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  title,
+                  style: TextStyle(
+                    color: Colors.grey.shade800,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

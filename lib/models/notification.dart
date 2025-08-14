@@ -25,19 +25,16 @@ class Notification extends BaseModel {
   @override
   Map<String, dynamic> toJson() => _$NotificationToJson(this);
 
-  @override
   Map<String, dynamic> toMap() => {
-        'id': id,
-        'user_id': userId,
-        'title': title,
-        'body': body,
-        'read': read,
-        'created_at': createdAt.toIso8601String(),
-      };
+    'id': id,
+    'user_id': userId,
+    'title': title,
+    'body': body,
+    'read': read,
+    'created_at': createdAt.toIso8601String(),
+  };
 
-  Notification copyWith({
-    bool? read,
-  }) {
+  Notification copyWith({bool? read}) {
     return Notification(
       id: id,
       userId: userId,

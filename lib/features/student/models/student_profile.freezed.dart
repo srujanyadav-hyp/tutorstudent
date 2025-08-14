@@ -209,8 +209,7 @@ class __$$StudentProfileImplCopyWithImpl<$Res>
 }
 
 /// @nodoc
-
-@JsonSerializable(fieldRename: FieldRename.snake)
+@JsonSerializable()
 class _$StudentProfileImpl implements _StudentProfile {
   const _$StudentProfileImpl(
       {required this.id,

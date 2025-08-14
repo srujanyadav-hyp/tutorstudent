@@ -55,12 +55,14 @@ class AuthController extends StateNotifier<bool> {
         throw 'Signup failed: No user data returned';
       }
 
-      _showMessage(context, 'Signup successful! Please log in.');
       if (context.mounted) {
+        _showMessage(context, 'Signup successful! Please log in.');
         context.go('/login');
       }
     } catch (e) {
-      _showMessage(context, ErrorHandler.getMessage(e));
+      if (context.mounted) {
+        _showMessage(context, ErrorHandler.getMessage(e));
+      }
     } finally {
       state = false;
     }
@@ -101,7 +103,9 @@ class AuthController extends StateNotifier<bool> {
         }
       }
     } catch (e) {
-      _showMessage(context, ErrorHandler.getMessage(e));
+      if (context.mounted) {
+        _showMessage(context, ErrorHandler.getMessage(e));
+      }
     } finally {
       state = false;
     }
@@ -119,7 +123,9 @@ class AuthController extends StateNotifier<bool> {
         context.go('/login');
       }
     } catch (e) {
-      _showMessage(context, ErrorHandler.getMessage(e));
+      if (context.mounted) {
+        _showMessage(context, ErrorHandler.getMessage(e));
+      }
     } finally {
       state = false;
     }
@@ -134,7 +140,9 @@ class AuthController extends StateNotifier<bool> {
         context.go('/login');
       }
     } catch (e) {
-      _showMessage(context, ErrorHandler.getMessage(e));
+      if (context.mounted) {
+        _showMessage(context, ErrorHandler.getMessage(e));
+      }
     } finally {
       state = false;
     }

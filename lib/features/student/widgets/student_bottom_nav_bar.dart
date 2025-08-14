@@ -29,6 +29,10 @@ class StudentBottomNavBar extends StatelessWidget {
           icon: Icon(Icons.trending_up),
           label: 'Progress',
         ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.school),
+          label: 'Resources',
+        ),
       ],
       onTap: (index) {
         switch (index) {
@@ -46,6 +50,9 @@ class StudentBottomNavBar extends StatelessWidget {
             break;
           case 4:
             context.go('/student/progress');
+            break;
+          case 5:
+            context.go('/student/resources');
             break;
         }
       },

@@ -26,7 +26,6 @@ class ThemeModeNotifier extends StateNotifier<ThemeMode> {
 // Current theme provider that combines role and theme mode
 final currentThemeProvider = Provider<ThemeData>((ref) {
   final userRole = ref.watch(userRoleProvider);
-  final themeMode = ref.watch(themeModeProvider);
 
   // Default to student role if no role is selected
   final role = userRole ?? UserRole.student;

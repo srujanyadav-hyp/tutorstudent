@@ -345,7 +345,9 @@ class _DashboardContent extends StatelessWidget {
                   ),
                   borderData: FlBorderData(
                     show: true,
-                    border: Border.all(color: Colors.grey.withOpacity(0.2)),
+                    border: Border.all(
+                      color: Colors.grey.withValues(alpha: 0.2),
+                    ),
                   ),
                   lineBarsData: [
                     LineChartBarData(
@@ -365,7 +367,9 @@ class _DashboardContent extends StatelessWidget {
                       dotData: FlDotData(show: true),
                       belowBarData: BarAreaData(
                         show: true,
-                        color: Theme.of(context).primaryColor.withOpacity(0.1),
+                        color: Theme.of(
+                          context,
+                        ).primaryColor.withValues(alpha: 0.1),
                       ),
                     ),
                   ],
@@ -420,7 +424,7 @@ class _StatCard extends StatelessWidget {
                   TextStyle(
                     color: Theme.of(
                       context,
-                    ).textTheme.bodyMedium?.color?.withOpacity(0.7),
+                    ).textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
                   ),
               textAlign: TextAlign.center,
               overflow: TextOverflow.ellipsis,
