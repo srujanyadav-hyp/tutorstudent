@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:tutorconnect/features/student/widgets/student_bottom_nav_bar.dart';
+import 'student_bottom_nav_bar.dart';
 
 class StudentScaffold extends StatelessWidget {
   final Widget body;
@@ -18,7 +18,17 @@ class StudentScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(title), actions: actions),
+      appBar: AppBar(
+        title: Text(
+          title,
+          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 18),
+        ),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        foregroundColor: Colors.grey[800],
+        actions: actions,
+        centerTitle: true,
+      ),
       body: body,
       bottomNavigationBar: StudentBottomNavBar(currentIndex: currentIndex),
     );

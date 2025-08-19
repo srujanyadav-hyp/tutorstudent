@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fl_chart/fl_chart.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/providers/supabase_provider.dart';
+import '../../../providers/role_provider.dart';
 import '../providers/tutor_provider.dart';
 import '../widgets/tutor_scaffold.dart';
 import '../models/tutor_dashboard_stats.dart';
@@ -37,6 +37,16 @@ class TutorDashboard extends ConsumerWidget {
             GoRouter.of(context).go('/profile');
           },
         ),
+        IconButton(
+          icon: const Icon(Icons.logout),
+          onPressed: () async {
+            await ref.read(supabaseServiceProvider).signOut();
+            await ref.read(userRoleProvider.notifier).clearRole();
+            if (context.mounted) {
+              GoRouter.of(context).go('/login');
+            }
+          },
+        ),
       ],
       body: statsAsync.when(
         data: (stats) => RefreshIndicator(
@@ -69,7 +79,7 @@ class TutorDashboard extends ConsumerWidget {
   Widget _buildWelcomeHeader(TutorDashboardStats stats) {
     return Card(
       elevation: 4,
-      shadowColor: Colors.blue.withValues(alpha: 0.2),
+      shadowColor: Colors.blue.withOpacity(0.2),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: Container(
         decoration: BoxDecoration(
@@ -77,10 +87,7 @@ class TutorDashboard extends ConsumerWidget {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              Colors.blue.shade50,
-              Colors.indigo.shade50,
-            ],
+            colors: [Colors.blue.shade50, Colors.indigo.shade50],
           ),
         ),
         child: Padding(
@@ -90,7 +97,7 @@ class TutorDashboard extends ConsumerWidget {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.blue.withValues(alpha: 0.1),
+                  color: Colors.blue.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Icon(
@@ -124,11 +131,14 @@ class TutorDashboard extends ConsumerWidget {
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
-                  color: Colors.green.withValues(alpha: 0.1),
+                  color: Colors.green.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.green.withValues(alpha: 0.3)),
+                  border: Border.all(color: Colors.green.withOpacity(0.3)),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -216,10 +226,10 @@ class TutorDashboard extends ConsumerWidget {
   }) {
     return Card(
       elevation: 3,
-      shadowColor: color.withValues(alpha: 0.3),
+      shadowColor: color.withOpacity(0.3),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: color.withValues(alpha: 0.1)),
+        side: BorderSide(color: color.withOpacity(0.1)),
       ),
       child: Container(
         decoration: BoxDecoration(
@@ -227,10 +237,7 @@ class TutorDashboard extends ConsumerWidget {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              color.withValues(alpha: 0.05),
-              color.withValues(alpha: 0.1),
-            ],
+            colors: [color.withOpacity(0.05), color.withOpacity(0.1)],
           ),
         ),
         child: Padding(
@@ -241,7 +248,7 @@ class TutorDashboard extends ConsumerWidget {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.1),
+                  color: color.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(icon, color: color, size: 24),
@@ -280,12 +287,50 @@ class TutorDashboard extends ConsumerWidget {
   }
 
   Widget _buildPerformanceChart(TutorDashboardStats stats) {
+    if (stats.performanceTrend.isEmpty) {
+      return Card(
+        elevation: 3,
+        shadowColor: Colors.blue.withOpacity(0.3),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(color: Colors.blue.withOpacity(0.1)),
+        ),
+        child: Container(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            children: [
+              Icon(
+                Icons.trending_up_outlined,
+                size: 48,
+                color: Colors.grey.shade400,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'No performance data yet',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey.shade600,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Performance metrics will appear here after sessions',
+                style: TextStyle(fontSize: 14, color: Colors.grey.shade500),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     return Card(
       elevation: 3,
-      shadowColor: Colors.blue.withValues(alpha: 0.3),
+      shadowColor: Colors.blue.withOpacity(0.3),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: Colors.blue.withValues(alpha: 0.1)),
+        side: BorderSide(color: Colors.blue.withOpacity(0.1)),
       ),
       child: Padding(
         padding: const EdgeInsets.all(20),
@@ -297,7 +342,7 @@ class TutorDashboard extends ConsumerWidget {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Colors.blue.withValues(alpha: 0.1),
+                    color: Colors.blue.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(Icons.trending_up, color: Colors.blue, size: 20),
@@ -316,31 +361,42 @@ class TutorDashboard extends ConsumerWidget {
             const SizedBox(height: 20),
             SizedBox(
               height: 200,
-              child: LineChart(
-                LineChartData(
-                  gridData: FlGridData(show: false),
-                  titlesData: FlTitlesData(show: false),
-                  borderData: FlBorderData(show: false),
-                  lineBarsData: [
-                    LineChartBarData(
-                      spots: List.generate(
-                        stats.performanceTrend.length,
-                        (index) => FlSpot(
-                          index.toDouble(),
-                          stats.performanceTrend[index],
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: stats.performanceTrend.length,
+                itemBuilder: (context, index) {
+                  final value = stats.performanceTrend[index];
+                  final maxValue = stats.performanceTrend.reduce(
+                    (curr, next) => curr > next ? curr : next,
+                  );
+                  final height = value / maxValue * 150;
+
+                  return Container(
+                    width: 40,
+                    margin: const EdgeInsets.symmetric(horizontal: 4),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Container(
+                          height: height,
+                          width: 8,
+                          decoration: BoxDecoration(
+                            color: Colors.blue,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
                         ),
-                      ),
-                      isCurved: true,
-                      color: Colors.blue,
-                      barWidth: 4,
-                      dotData: FlDotData(show: false),
-                      belowBarData: BarAreaData(
-                        show: true,
-                        color: Colors.blue.withValues(alpha: 0.1),
-                      ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Day ${index + 1}',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey.shade600,
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  );
+                },
               ),
             ),
           ],
@@ -364,7 +420,7 @@ class TutorDashboard extends ConsumerWidget {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Colors.orange.withValues(alpha: 0.1),
+                    color: Colors.orange.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(
@@ -454,7 +510,8 @@ class TutorDashboard extends ConsumerWidget {
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               itemCount: sessions.length > 3 ? 3 : sessions.length,
-              itemBuilder: (context, index) => _buildSessionCard(sessions[index]),
+              itemBuilder: (context, index) =>
+                  _buildSessionCard(sessions[index]),
             );
           },
           loading: () => const Center(child: CircularProgressIndicator()),
@@ -472,7 +529,7 @@ class TutorDashboard extends ConsumerWidget {
       child: ListTile(
         contentPadding: const EdgeInsets.all(16),
         leading: CircleAvatar(
-          backgroundColor: Colors.blue.withValues(alpha: 0.1),
+          backgroundColor: Colors.blue.withOpacity(0.1),
           child: Icon(Icons.person, color: Colors.blue),
         ),
         title: Text(
@@ -493,7 +550,7 @@ class TutorDashboard extends ConsumerWidget {
         trailing: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
-            color: Colors.orange.withValues(alpha: 0.1),
+            color: Colors.orange.withOpacity(0.1),
             borderRadius: BorderRadius.circular(20),
           ),
           child: Text(
@@ -523,14 +580,10 @@ class TutorDashboard extends ConsumerWidget {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Colors.green.withValues(alpha: 0.1),
+                    color: Colors.green.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Icon(
-                    Icons.people,
-                    color: Colors.green,
-                    size: 20,
-                  ),
+                  child: Icon(Icons.people, color: Colors.green, size: 20),
                 ),
                 const SizedBox(width: 12),
                 Column(
@@ -613,7 +666,8 @@ class TutorDashboard extends ConsumerWidget {
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               itemCount: students.length > 3 ? 3 : students.length,
-              itemBuilder: (context, index) => _buildStudentCard(students[index]),
+              itemBuilder: (context, index) =>
+                  _buildStudentCard(students[index]),
             );
           },
           loading: () => const Center(child: CircularProgressIndicator()),
@@ -631,7 +685,7 @@ class TutorDashboard extends ConsumerWidget {
       child: ListTile(
         contentPadding: const EdgeInsets.all(16),
         leading: CircleAvatar(
-          backgroundColor: Colors.green.withValues(alpha: 0.1),
+          backgroundColor: Colors.green.withOpacity(0.1),
           child: Icon(Icons.person, color: Colors.green),
         ),
         title: Text(
@@ -658,7 +712,7 @@ class TutorDashboard extends ConsumerWidget {
         trailing: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
-            color: Colors.blue.withValues(alpha: 0.1),
+            color: Colors.blue.withOpacity(0.1),
             borderRadius: BorderRadius.circular(20),
           ),
           child: Text(

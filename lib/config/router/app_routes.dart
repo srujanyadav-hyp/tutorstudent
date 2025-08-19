@@ -8,7 +8,8 @@ import '../../features/auth/screens/forget_password_screen.dart';
 import '../../features/onboarding/screens/splash_screen.dart';
 import '../../features/onboarding/screens/onboarding_screen.dart';
 import '../../features/onboarding/screens/role_selection_screen.dart';
-import '../../features/profile/screens/profile_screen.dart';
+import '../../features/tutor/screens/tutor_profile_screen.dart';
+import '../../features/student/screens/student_profile_screen.dart';
 import '../../features/tutor/screens/tutor_layout.dart';
 import '../../features/student/screens/student_dashboard.dart';
 import '../../features/student/screens/session_list_screen.dart';
@@ -16,14 +17,18 @@ import '../../features/student/screens/session_detail_screen.dart';
 import '../../features/student/screens/assignment_list_screen.dart';
 import '../../features/student/screens/assignment_detail_screen.dart';
 import '../../features/student/screens/tutor_list_screen.dart';
-import '../../features/student/screens/progress_screen.dart';
-
 import '../../features/tutor/models/student_management.dart';
 import '../../features/tutor/screens/student_detail_screen.dart';
 import '../../models/user_role.dart';
 import '../../providers/role_provider.dart';
 import '../../features/messaging/config/chat_routes.dart';
 import '../../features/live_session/screens/live_session_screen.dart';
+import '../../features/common/screens/error_screen.dart';
+import '../../features/student/screens/study_resources_screen.dart';
+import '../../features/student/screens/resource_list_screen.dart';
+import '../../features/student/screens/resource_search_screen.dart';
+import '../../features/student/screens/resource_detail_screen.dart';
+import '../../features/student/screens/subject_resources_screen.dart';
 
 String? _getRedirectLocation(
   String location,
@@ -84,6 +89,8 @@ final goRouterProvider = Provider<GoRouter>((ref) {
   final supabase = Supabase.instance.client;
 
   return GoRouter(
+    errorBuilder: (context, state) =>
+        ErrorScreen(message: state.error.toString(), state: state),
     redirect: (context, state) {
       return _getRedirectLocation(state.uri.path, supabase, role, state);
     },
@@ -213,18 +220,87 @@ final goRouterProvider = Provider<GoRouter>((ref) {
             path: 'tutors',
             builder: (context, state) => const TutorListScreen(),
           ),
-          GoRoute(
-            path: 'progress',
-            builder: (context, state) => const ProgressScreen(),
-          ),
+
           ...chatRoutes,
+
+          // Resources Routes
+          GoRoute(
+            path: 'resources',
+            builder: (context, state) => const StudyResourcesScreen(),
+          ),
+          GoRoute(
+            path: 'resources/search',
+            builder: (context, state) {
+              final query = state.uri.queryParameters['q'];
+              return ResourceSearchScreen(query: query ?? '');
+            },
+          ),
+          GoRoute(
+            path: 'resources/practice-tests',
+            builder: (context, state) =>
+                const ResourceListScreen(type: 'practice-tests'),
+          ),
+          GoRoute(
+            path: 'resources/practice-tests/:id',
+            builder: (context, state) {
+              final testId = state.pathParameters['id']!;
+              return ResourceDetailScreen(id: testId, type: 'practice-test');
+            },
+          ),
+          GoRoute(
+            path: 'resources/videos',
+            builder: (context, state) =>
+                const ResourceListScreen(type: 'videos'),
+          ),
+          GoRoute(
+            path: 'resources/guides',
+            builder: (context, state) =>
+                const ResourceListScreen(type: 'guides'),
+          ),
+          GoRoute(
+            path: 'resources/flashcards',
+            builder: (context, state) =>
+                const ResourceListScreen(type: 'flashcards'),
+          ),
+          GoRoute(
+            path: 'resources/subjects/:subject',
+            builder: (context, state) {
+              final subject = state.pathParameters['subject']!;
+              return SubjectResourcesScreen(subjectId: subject);
+            },
+          ),
+          GoRoute(
+            path: 'resources/view/:id',
+            builder: (context, state) {
+              final resourceId = state.pathParameters['id']!;
+              return ResourceDetailScreen(id: resourceId, type: 'resource');
+            },
+          ),
         ],
       ),
 
-      // Profile Route
+      // Profile Routes
       GoRoute(
         path: '/profile',
-        builder: (context, state) => const ProfileScreen(),
+        redirect: (context, state) {
+          final role = ref.read(userRoleProvider);
+          switch (role) {
+            case UserRole.tutor:
+              return '/tutor/profile';
+            case UserRole.student:
+              return '/student/profile';
+            default:
+              return '/login';
+          }
+        },
+      ),
+      GoRoute(
+        path: '/tutor/profile',
+        builder: (context, state) => const TutorProfileScreen(),
+      ),
+      GoRoute(
+        path: '/student/profile',
+        builder: (context, state) => const StudentProfileScreen(),
       ),
 
       // Root Route

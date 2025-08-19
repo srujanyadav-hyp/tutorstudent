@@ -4,14 +4,14 @@ import 'package:go_router/go_router.dart';
 
 import '../../../models/user_role.dart';
 import '../../../providers/role_provider.dart';
-import '../../../core/providers/supabase_provider.dart';
+import '../../../core/providers/supabase_provider.dart' as provider;
 import '../../../core/services/supabase_service.dart';
 import '../../../core/utils/error_handler.dart';
 
 final authControllerProvider = StateNotifierProvider<AuthController, bool>((
   ref,
 ) {
-  final supabaseService = ref.watch(supabaseServiceProvider);
+  final supabaseService = ref.watch(provider.supabaseServiceProvider);
   return AuthController(ref, supabaseService);
 });
 

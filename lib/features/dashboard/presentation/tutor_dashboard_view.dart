@@ -1,4 +1,3 @@
-import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -77,32 +76,35 @@ class _DashboardContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildStatCards(context),
-          const SizedBox(height: 24),
-          _buildSessionChart(context),
-          const SizedBox(height: 24),
-          _buildEarningsChart(context),
-        ],
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      child: LayoutBuilder(
+        builder: (context, constraints) => Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildStatCards(context, constraints),
+            const SizedBox(height: 16),
+            _buildSessionChart(context, constraints),
+            const SizedBox(height: 16),
+            _buildEarningsChart(context, constraints),
+            const SizedBox(height: 8), // Bottom padding
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildStatCards(BuildContext context) {
-    final numberFormat = NumberFormat.currency(symbol: '\$');
-    final width = MediaQuery.of(context).size.width;
+  Widget _buildStatCards(BuildContext context, BoxConstraints constraints) {
+    final numberFormat = NumberFormat.currency(symbol: '\$', decimalDigits: 0);
+    final width = constraints.maxWidth;
     final crossAxisCount = width < 600 ? 2 : 3;
 
     return GridView.count(
       crossAxisCount: crossAxisCount,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      mainAxisSpacing: 16,
-      crossAxisSpacing: 16,
-      childAspectRatio: width < 600 ? 1.5 : 1.3,
+      mainAxisSpacing: 12,
+      crossAxisSpacing: 12,
+      childAspectRatio: width < 600 ? 1.6 : 1.4,
       children: [
         _StatCard(
           title: 'Total Sessions',
@@ -139,28 +141,7 @@ class _DashboardContent extends StatelessWidget {
     );
   }
 
-  Widget _buildSessionChart(BuildContext context) {
-    if (stats.sessionMetrics.isEmpty) {
-      return Card(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Sessions This Week',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 16),
-              const Center(
-                child: Text('No session data available for this week'),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
+  Widget _buildSessionChart(BuildContext context, BoxConstraints constraints) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -172,68 +153,24 @@ class _DashboardContent extends StatelessWidget {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
-            SizedBox(
-              height: 200,
-              child: BarChart(
-                BarChartData(
-                  alignment: BarChartAlignment.spaceAround,
-                  maxY:
-                      (stats.sessionMetrics
-                                  .map((m) => m.sessionCount.toDouble())
-                                  .reduce((a, b) => a > b ? a : b) *
-                              1.2)
-                          .clamp(5.0, double.infinity),
-                  titlesData: FlTitlesData(
-                    leftTitles: AxisTitles(
-                      sideTitles: SideTitles(showTitles: true),
+            ...stats.sessionMetrics.map(
+              (metric) => Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      DateFormat('EEEE').format(metric.date),
+                      style: const TextStyle(fontSize: 14),
                     ),
-                    bottomTitles: AxisTitles(
-                      sideTitles: SideTitles(
-                        showTitles: true,
-                        getTitlesWidget: (value, meta) {
-                          if (value.toInt() >= 0 &&
-                              value.toInt() < stats.sessionMetrics.length) {
-                            try {
-                              return Text(
-                                DateFormat('E').format(
-                                  stats.sessionMetrics[value.toInt()].date,
-                                ),
-                                semanticsLabel: DateFormat('EEEE').format(
-                                  stats.sessionMetrics[value.toInt()].date,
-                                ),
-                              );
-                            } catch (e) {
-                              return const SizedBox();
-                            }
-                          }
-                          return const SizedBox();
-                        },
+                    Text(
+                      '${metric.sessionCount} sessions',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                    rightTitles: AxisTitles(
-                      sideTitles: SideTitles(showTitles: false),
-                    ),
-                    topTitles: AxisTitles(
-                      sideTitles: SideTitles(showTitles: false),
-                    ),
-                  ),
-                  borderData: FlBorderData(show: false),
-                  barGroups: stats.sessionMetrics
-                      .asMap()
-                      .entries
-                      .map(
-                        (entry) => BarChartGroupData(
-                          x: entry.key,
-                          barRods: [
-                            BarChartRodData(
-                              toY: entry.value.sessionCount.toDouble(),
-                              width: 20,
-                              color: Theme.of(context).primaryColor,
-                            ),
-                          ],
-                        ),
-                      )
-                      .toList(),
+                  ],
                 ),
               ),
             ),
@@ -243,8 +180,8 @@ class _DashboardContent extends StatelessWidget {
     );
   }
 
-  Widget _buildEarningsChart(BuildContext context) {
-    final numberFormat = NumberFormat.currency(symbol: '\$');
+  Widget _buildEarningsChart(BuildContext context, BoxConstraints constraints) {
+    final numberFormat = NumberFormat.currency(symbol: '\$', decimalDigits: 0);
 
     if (stats.earningMetrics.isEmpty) {
       return Card(
@@ -267,12 +204,6 @@ class _DashboardContent extends StatelessWidget {
       );
     }
 
-    // Calculate maxY safely
-    final maxAmount = stats.earningMetrics
-        .map((m) => m.amount)
-        .reduce((a, b) => a > b ? a : b);
-    final maxY = maxAmount > 0 ? maxAmount * 1.2 : 100.0;
-
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -284,97 +215,49 @@ class _DashboardContent extends StatelessWidget {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
-            SizedBox(
-              height: 200,
-              child: LineChart(
-                LineChartData(
-                  minY: 0,
-                  maxY: maxY,
-                  titlesData: FlTitlesData(
-                    leftTitles: AxisTitles(
-                      sideTitles: SideTitles(
-                        showTitles: true,
-                        getTitlesWidget: (value, meta) {
-                          try {
-                            return Text(
-                              numberFormat.format(value),
-                              semanticsLabel:
-                                  '${numberFormat.format(value)} dollars',
-                            );
-                          } catch (e) {
-                            return const SizedBox();
-                          }
-                        },
-                        reservedSize: 60,
-                      ),
+            ...stats.earningMetrics.map(
+              (metric) => Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      DateFormat('EEEE').format(metric.date),
+                      style: const TextStyle(fontSize: 14),
                     ),
-                    bottomTitles: AxisTitles(
-                      sideTitles: SideTitles(
-                        showTitles: true,
-                        getTitlesWidget: (value, meta) {
-                          if (value.toInt() >= 0 &&
-                              value.toInt() < stats.earningMetrics.length) {
-                            try {
-                              return Text(
-                                DateFormat('E').format(
-                                  stats.earningMetrics[value.toInt()].date,
-                                ),
-                                semanticsLabel: DateFormat('EEEE').format(
-                                  stats.earningMetrics[value.toInt()].date,
-                                ),
-                              );
-                            } catch (e) {
-                              return const SizedBox();
-                            }
-                          }
-                          return const SizedBox();
-                        },
-                      ),
-                    ),
-                    rightTitles: AxisTitles(
-                      sideTitles: SideTitles(showTitles: false),
-                    ),
-                    topTitles: AxisTitles(
-                      sideTitles: SideTitles(showTitles: false),
-                    ),
-                  ),
-                  gridData: FlGridData(
-                    show: true,
-                    drawHorizontalLine: true,
-                    drawVerticalLine: false,
-                  ),
-                  borderData: FlBorderData(
-                    show: true,
-                    border: Border.all(
-                      color: Colors.grey.withValues(alpha: 0.2),
-                    ),
-                  ),
-                  lineBarsData: [
-                    LineChartBarData(
-                      spots: stats.earningMetrics
-                          .asMap()
-                          .entries
-                          .map(
-                            (entry) => FlSpot(
-                              entry.key.toDouble(),
-                              entry.value.amount,
-                            ),
-                          )
-                          .toList(),
-                      isCurved: true,
-                      color: Theme.of(context).primaryColor,
-                      barWidth: 3,
-                      dotData: FlDotData(show: true),
-                      belowBarData: BarAreaData(
-                        show: true,
-                        color: Theme.of(
-                          context,
-                        ).primaryColor.withValues(alpha: 0.1),
+                    Text(
+                      numberFormat.format(metric.amount),
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ],
                 ),
               ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Total for Week:',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                Text(
+                  numberFormat.format(
+                    stats.earningMetrics.fold<double>(
+                      0,
+                      (sum, metric) => sum + metric.amount,
+                    ),
+                  ),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.green,
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -398,39 +281,53 @@ class _StatCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              icon,
-              size: 32,
-              color: Theme.of(context).primaryColor,
-              semanticLabel: '$title icon',
-            ),
-            const SizedBox(height: 8),
-            Text(
-              value,
-              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              overflow: TextOverflow.ellipsis,
-            ),
-            const SizedBox(height: 4),
-            Text(
-              title,
-              style:
-                  Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).textTheme.bodySmall?.color,
-                  ) ??
-                  TextStyle(
-                    color: Theme.of(
-                      context,
-                    ).textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
+        padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 12.0),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final isSmall = constraints.maxWidth < 160;
+
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  icon,
+                  size: isSmall ? 22 : 24,
+                  color: Theme.of(context).primaryColor,
+                  semanticLabel: '$title icon',
+                ),
+                const SizedBox(height: 4),
+                Flexible(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      value,
+                      style: TextStyle(
+                        fontSize: isSmall ? 16 : 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
-              textAlign: TextAlign.center,
-              overflow: TextOverflow.ellipsis,
-              maxLines: 2,
-            ),
-          ],
+                ),
+                const SizedBox(height: 2),
+                Flexible(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      title,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).textTheme.bodySmall?.color,
+                        fontSize: isSmall ? 9 : 10,
+                      ),
+                      textAlign: TextAlign.center,
+                      maxLines: 1,
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
         ),
       ),
     );

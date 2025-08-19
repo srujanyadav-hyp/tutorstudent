@@ -51,19 +51,25 @@ class StudentManagementService {
 
   Future<StudentProgress> getStudentProgress(String studentId) async {
     try {
-      // Get attendance records
+      // Get attendance records for student's classes
       final attendanceResponse = await _supabase
-          .from('session_attendance')
-          .select()
+          .from('student_class_attendance')
+          .select('''
+            *,
+            session:class_sessions(
+              id,
+              scheduled_at
+            )
+          ''')
           .eq('student_id', studentId);
 
       final attendance = (attendanceResponse as List)
           .map(
             (data) => SessionAttendance(
               sessionId: data['session_id'],
-              date: DateTime.parse(data['date']),
-              attended: data['attended'],
-              notes: data['notes'],
+              date: DateTime.parse(data['session']['scheduled_at']),
+              attended: true, // If there's a record, they attended
+              notes: null, // Notes are not currently stored
             ),
           )
           .toList();
@@ -104,7 +110,7 @@ class StudentManagementService {
             {},
             (map, data) => {
               ...map,
-              data['subject']: (data['progress'] as num).toDouble(),
+              data['subject']: (data['progress'] as num?)?.toDouble() ?? 0.0,
             },
           );
 
@@ -120,50 +126,10 @@ class StudentManagementService {
   }
 
   Future<void> addStudent(String tutorId, String studentEmail) async {
-    try {
-      // First, check if the user exists and is a student
-      final userResponse = await _supabase
-          .from('user_profiles')
-          .select('id, role')
-          .eq('email', studentEmail)
-          .maybeSingle();
-
-      if (userResponse == null) {
-        throw Exception('Student not found with this email');
-      }
-
-      if (userResponse['role'] != 'student') {
-        throw Exception('User is not a student');
-      }
-
-      final studentId = userResponse['id'] as String;
-
-      // Check if connection already exists
-      final existingConnection = await _supabase
-          .from('student_tutor_connections')
-          .select('id')
-          .eq('tutor_id', tutorId)
-          .eq('student_id', studentId)
-          .eq('status', 'active')
-          .maybeSingle();
-
-      if (existingConnection != null) {
-        throw Exception('Student is already connected to this tutor');
-      }
-
-      // Create connection
-      await _supabase.from('student_tutor_connections').insert({
-        'tutor_id': tutorId,
-        'student_id': studentId,
-        'status': 'active',
-      });
-    } catch (e) {
-      if (e is PostgrestException) {
-        throw Exception('Database error: ${e.message}');
-      } else {
-        throw Exception('Failed to add student: ${e.toString()}');
-      }
-    }
+    // Disabled by product decision: students initiate connection after payment
+    throw Exception(
+      'Adding students manually is disabled. Students must connect after payment.',
+    );
   }
 
   Future<void> removeStudent(String connectionId) async {
@@ -195,6 +161,23 @@ class StudentManagementService {
       }
     } catch (e) {
       throw Exception('Failed to update student details: ${e.toString()}');
+    }
+  }
+
+  Future<void> updateSubjectProgress(
+    String studentId,
+    String subject,
+    double progress,
+  ) async {
+    try {
+      await _supabase.from('subject_progress').upsert({
+        'student_id': studentId,
+        'subject': subject,
+        'progress': progress,
+        'last_updated': DateTime.now().toIso8601String(),
+      });
+    } catch (e) {
+      throw Exception('Failed to update subject progress: ${e.toString()}');
     }
   }
 }

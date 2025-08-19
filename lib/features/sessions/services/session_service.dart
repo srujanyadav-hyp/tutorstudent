@@ -83,20 +83,24 @@ class SessionService {
 
       final session = Session.fromJson(sessionResponse);
 
-      // If student IDs are provided, create student session links
+      // Automatically enroll all connected students in the session
+      await _client.rpc(
+        'enroll_all_students_in_session',
+        params: {'p_session_id': session.id, 'p_tutor_id': tutorId},
+      );
+
+      // If specific student IDs are provided, ensure they are enrolled
       if (studentIds != null && studentIds.isNotEmpty) {
-        await _client
-            .from('student_sessions')
-            .insert(
-              studentIds
-                  .map(
-                    (studentId) => {
-                      'session_id': session.id,
-                      'student_id': studentId,
-                    },
-                  )
-                  .toList(),
-            );
+        for (final studentId in studentIds) {
+          await _client.rpc(
+            'enroll_student_in_session',
+            params: {
+              'p_session_id': session.id,
+              'p_student_id': studentId,
+              'p_tutor_id': tutorId,
+            },
+          );
+        }
       }
 
       return session;

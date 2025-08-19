@@ -10,24 +10,42 @@ abstract class BaseService {
   SupabaseQueryBuilder get table => _supabase.from(tableName);
 
   Future<List<Map<String, dynamic>>> getAll() async {
-    final response = await table.select();
-    return List<Map<String, dynamic>>.from(response);
+    try {
+      final response = await table.select();
+      return List<Map<String, dynamic>>.from(response);
+    } catch (e) {
+      throw 'Failed to fetch records: ${e.toString()}';
+    }
   }
 
   Future<Map<String, dynamic>?> getById(String id) async {
-    final response = await table.select().eq('id', id).maybeSingle();
-    return response;
+    try {
+      final response = await table.select().eq('id', id).maybeSingle();
+      return response;
+    } catch (e) {
+      throw 'Failed to fetch record: ${e.toString()}';
+    }
   }
 
   Future<Map<String, dynamic>> create(Map<String, dynamic> data) async {
-    final response = await table.insert(data).select().single();
-    return response;
+    try {
+      final response = await table.insert(data).select().single();
+      return response;
+    } catch (e) {
+      throw 'Failed to create record: ${e.toString()}';
+    }
   }
 
   Future<Map<String, dynamic>> update(
-      String id, Map<String, dynamic> data) async {
-    final response = await table.update(data).eq('id', id).select().single();
-    return response;
+    String id,
+    Map<String, dynamic> data,
+  ) async {
+    try {
+      final response = await table.update(data).eq('id', id).select().single();
+      return response;
+    } catch (e) {
+      throw 'Failed to update record: ${e.toString()}';
+    }
   }
 
   Future<void> delete(String id) async {

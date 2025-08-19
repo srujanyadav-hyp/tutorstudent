@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fl_chart/fl_chart.dart';
 import '../../../core/providers/supabase_provider.dart';
 import '../providers/student_provider.dart';
-import '../widgets/session_card.dart';
-import '../widgets/assignment_card.dart';
 import '../widgets/student_scaffold.dart';
-import '../models/student_dashboard_stats.dart';
+import '../widgets/error_view.dart';
 import 'package:go_router/go_router.dart';
 
 class StudentDashboard extends ConsumerWidget {
@@ -16,7 +13,12 @@ class StudentDashboard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(supabaseServiceProvider).client.auth.currentUser;
     if (user == null) {
-      return const Scaffold(body: Center(child: Text('Not authenticated')));
+      return Scaffold(
+        body: ErrorView(
+          message: 'You need to be signed in to access the dashboard.',
+          onRetry: () => ref.refresh(supabaseServiceProvider),
+        ),
+      );
     }
 
     final statsAsync = ref.watch(studentStatsProvider(user.id));
@@ -28,129 +30,88 @@ class StudentDashboard extends ConsumerWidget {
       currentIndex: 0,
       actions: [
         IconButton(
-          icon: const Icon(Icons.person),
+          icon: const Icon(Icons.account_circle),
+          tooltip: 'Profile',
           onPressed: () {
             GoRouter.of(context).go('/student/profile');
           },
         ),
       ],
       body: statsAsync.when(
-        data: (stats) => RefreshIndicator(
-          onRefresh: () => ref.refresh(studentStatsProvider(user.id).future),
-          child: SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildStatCards(stats),
-                const SizedBox(height: 24),
-                _buildQuickActions(context),
-                const SizedBox(height: 24),
-                _buildProgressChart(stats),
-                const SizedBox(height: 24),
-                _buildUpcomingSessions(context, upcomingSessions),
-                const SizedBox(height: 24),
-                _buildAssignments(context, assignments),
-              ],
-            ),
+        data: (stats) => SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildWelcomeCard(),
+              const SizedBox(height: 20),
+              _buildQuickStats(stats),
+              const SizedBox(height: 20),
+              _buildUpcomingSessions(context, upcomingSessions),
+              const SizedBox(height: 20),
+              _buildRecentAssignments(context, assignments),
+            ],
           ),
         ),
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => Center(child: Text('Error: $error')),
+        error: (error, stack) => ErrorView(
+          message: error.toString(),
+          onRetry: () => ref.refresh(studentStatsProvider(user.id)),
+        ),
       ),
     );
   }
 
-  Widget _buildStatCards(StudentDashboardStats stats) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  Widget _buildWelcomeCard() {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Your Progress',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.grey.shade800,
-              ),
+            const Text(
+              'Welcome!',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: Colors.blue.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: Colors.blue.withValues(alpha: 0.3)),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.trending_up, size: 16, color: Colors.blue),
-                  const SizedBox(width: 4),
-                  Text(
-                    '${(stats.averageScore * 100).round()}%',
-                    style: TextStyle(
-                      color: Colors.blue,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
+            const SizedBox(height: 8),
+            const Text(
+              'Ready to learn something new today?',
+              style: TextStyle(fontSize: 16, color: Colors.grey),
             ),
           ],
         ),
-        const SizedBox(height: 16),
-        GridView.count(
-          crossAxisCount: 2,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          mainAxisSpacing: 16,
-          crossAxisSpacing: 16,
-          childAspectRatio: 1.1,
-          children: [
-            _buildStatCard(
-              'Total Sessions',
-              stats.totalSessions.toString(),
-              Icons.calendar_today,
-              Colors.blue,
-              subtitle: 'Learning journey',
-              onTap: () {
-                // TODO: Navigate to sessions history
-              },
-            ),
-            _buildStatCard(
-              'Upcoming',
-              stats.upcomingSessions.toString(),
-              Icons.upcoming,
-              Colors.orange,
-              subtitle: 'Next sessions',
-              onTap: () {
-                // TODO: Navigate to upcoming sessions
-              },
-            ),
-            _buildStatCard(
-              'Completed',
-              stats.completedAssignments.toString(),
-              Icons.assignment_turned_in,
-              Colors.green,
-              subtitle: 'Assignments done',
-              onTap: () {
-                // TODO: Navigate to completed assignments
-              },
-            ),
-            _buildStatCard(
-              'Performance',
-              '${(stats.averageScore * 100).round()}%',
-              Icons.score,
-              Colors.purple,
-              subtitle: 'Average score',
-              onTap: () {
-                // TODO: Navigate to performance analytics
-              },
-            ),
-          ],
+      ),
+    );
+  }
+
+  Widget _buildQuickStats(dynamic stats) {
+    return Row(
+      children: [
+        Expanded(
+          child: _buildStatCard(
+            'Sessions',
+            stats?.totalSessions?.toString() ?? '0',
+            Icons.calendar_today,
+            Colors.blue,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: _buildStatCard(
+            'Assignments',
+            stats?.completedAssignments?.toString() ?? '0',
+            Icons.assignment,
+            Colors.green,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: _buildStatCard(
+            'Score',
+            '${((stats?.averageScore ?? 0) * 100).round()}%',
+            Icons.score,
+            Colors.orange,
+          ),
         ),
       ],
     );
@@ -160,149 +121,22 @@ class StudentDashboard extends ConsumerWidget {
     String title,
     String value,
     IconData icon,
-    Color color, {
-    String? subtitle,
-    VoidCallback? onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Card(
-        elevation: 3,
-        shadowColor: color.withValues(alpha: 0.3),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: BorderSide(color: color.withValues(alpha: 0.1)),
-        ),
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                color.withValues(alpha: 0.05),
-                color.withValues(alpha: 0.1),
-              ],
-            ),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: color.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(icon, color: color, size: 24),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  value,
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: color,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  title,
-                  style: TextStyle(
-                    color: Colors.grey.shade700,
-                    fontWeight: FontWeight.w600,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                if (subtitle != null) ...[
-                  const SizedBox(height: 4),
-                  Text(
-                    subtitle,
-                    style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-                if (onTap != null) ...[
-                  const SizedBox(height: 8),
-                  Icon(
-                    Icons.arrow_forward_ios,
-                    size: 16,
-                    color: color.withValues(alpha: 0.6),
-                  ),
-                ],
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildProgressChart(StudentDashboardStats stats) {
+    Color color,
+  ) {
     return Card(
-      elevation: 3,
-      shadowColor: Colors.blue.withValues(alpha: 0.3),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: Colors.blue.withValues(alpha: 0.1)),
-      ),
       child: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(16),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.blue.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Icon(Icons.trending_up, color: Colors.blue, size: 20),
-                ),
-                const SizedBox(width: 12),
-                Text(
-                  'Progress Trend',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.grey.shade800,
-                  ),
-                ),
-              ],
+            Icon(icon, color: color, size: 32),
+            const SizedBox(height: 8),
+            Text(
+              value,
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
-            const SizedBox(height: 20),
-            SizedBox(
-              height: 200,
-              child: LineChart(
-                LineChartData(
-                  gridData: FlGridData(show: false),
-                  titlesData: FlTitlesData(show: false),
-                  borderData: FlBorderData(show: false),
-                  lineBarsData: [
-                    LineChartBarData(
-                      spots: List.generate(
-                        stats.progressTrend.length,
-                        (index) => FlSpot(
-                          index.toDouble(),
-                          stats.progressTrend[index],
-                        ),
-                      ),
-                      isCurved: true,
-                      color: Colors.blue,
-                      barWidth: 4,
-                      dotData: FlDotData(show: false),
-                      belowBarData: BarAreaData(
-                        show: true,
-                        color: Colors.blue.withValues(alpha: 0.1),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+            Text(
+              title,
+              style: const TextStyle(color: Colors.grey, fontSize: 12),
             ),
           ],
         ),
@@ -317,279 +151,107 @@ class StudentDashboard extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.orange.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Icon(
-                    Icons.calendar_today,
-                    color: Colors.orange,
-                    size: 20,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Upcoming Sessions',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.grey.shade800,
-                      ),
-                    ),
-                    Text(
-                      'Your next learning sessions',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey.shade600,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            TextButton.icon(
-              onPressed: () => GoRouter.of(context).go('/student/sessions'),
-              icon: Icon(Icons.arrow_forward_ios, size: 16),
-              label: const Text('View All'),
-              style: TextButton.styleFrom(
-                foregroundColor: Colors.orange,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-              ),
-            ),
-          ],
+        const Text(
+          'Upcoming Sessions',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 12),
         sessionsAsync.when(
           data: (sessions) {
             if (sessions.isEmpty) {
-              return Container(
-                padding: const EdgeInsets.all(32),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade50,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.grey.shade200),
-                ),
-                child: Column(
-                  children: [
-                    Icon(
-                      Icons.calendar_today_outlined,
-                      size: 48,
-                      color: Colors.grey.shade400,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
+              return const Card(
+                child: Padding(
+                  padding: EdgeInsets.all(20),
+                  child: Center(
+                    child: Text(
                       'No upcoming sessions',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.grey.shade600,
-                      ),
+                      style: TextStyle(color: Colors.grey),
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Book a session with your tutor to get started',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey.shade500,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
+                  ),
                 ),
               );
             }
-            return ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: sessions.length > 3 ? 3 : sessions.length,
-              itemBuilder: (context, index) =>
-                  SessionCard(session: sessions[index]),
+            return Column(
+              children: sessions
+                  .take(3)
+                  .map((session) => _buildSessionCard(session))
+                  .toList(),
             );
           },
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, _) => Text('Error: $error'),
+          error: (error, stack) => Text('Error: $error'),
         ),
       ],
     );
   }
 
-  Widget _buildAssignments(
+  Widget _buildSessionCard(Map<String, dynamic> session) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 8),
+      child: ListTile(
+        leading: const CircleAvatar(
+          backgroundColor: Colors.blue,
+          child: Icon(Icons.calendar_today, color: Colors.white),
+        ),
+        title: Text(session['title'] ?? 'Session'),
+        subtitle: Text(session['scheduled_at'] ?? ''),
+        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+      ),
+    );
+  }
+
+  Widget _buildRecentAssignments(
     BuildContext context,
     AsyncValue<List<Map<String, dynamic>>> assignmentsAsync,
   ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Text(
-              'Recent Assignments',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            TextButton(
-              onPressed: () => GoRouter.of(context).go('/student/assignments'),
-              child: const Text('View All'),
-            ),
-          ],
+        const Text(
+          'Recent Assignments',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 12),
         assignmentsAsync.when(
           data: (assignments) {
             if (assignments.isEmpty) {
               return const Card(
                 child: Padding(
-                  padding: EdgeInsets.all(16),
-                  child: Text('No assignments'),
+                  padding: EdgeInsets.all(20),
+                  child: Center(
+                    child: Text(
+                      'No assignments',
+                      style: TextStyle(color: Colors.grey),
+                    ),
+                  ),
                 ),
               );
             }
-            return ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: assignments.length > 3 ? 3 : assignments.length,
-              itemBuilder: (context, index) =>
-                  AssignmentCard(assignment: assignments[index]),
+            return Column(
+              children: assignments
+                  .take(3)
+                  .map((assignment) => _buildAssignmentCard(assignment))
+                  .toList(),
             );
           },
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, _) => Text('Error: $error'),
+          error: (error, stack) => Text('Error: $error'),
         ),
       ],
     );
   }
 
-  Widget _buildQuickActions(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Quick Actions',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Colors.grey.shade800,
-          ),
+  Widget _buildAssignmentCard(Map<String, dynamic> assignment) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 8),
+      child: ListTile(
+        leading: const CircleAvatar(
+          backgroundColor: Colors.green,
+          child: Icon(Icons.assignment, color: Colors.white),
         ),
-        const SizedBox(height: 16),
-        Row(
-          children: [
-            Expanded(
-              child: _buildQuickActionCard(
-                context,
-                'Book Session',
-                Icons.calendar_today,
-                Colors.blue,
-                () => GoRouter.of(context).go('/student/book-session'),
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: _buildQuickActionCard(
-                context,
-                'Find Tutor',
-                Icons.search,
-                Colors.green,
-                () => GoRouter.of(context).go('/student/search-tutors'),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        Row(
-          children: [
-            Expanded(
-              child: _buildQuickActionCard(
-                context,
-                'Submit Assignment',
-                Icons.assignment,
-                Colors.orange,
-                () => GoRouter.of(context).go('/student/assignments'),
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: _buildQuickActionCard(
-                context,
-                'View Progress',
-                Icons.trending_up,
-                Colors.purple,
-                () => GoRouter.of(context).go('/student/progress'),
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildQuickActionCard(
-    BuildContext context,
-    String title,
-    IconData icon,
-    Color color,
-    VoidCallback onTap,
-  ) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Card(
-        elevation: 2,
-        shadowColor: color.withValues(alpha: 0.2),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: BorderSide(color: color.withValues(alpha: 0.1)),
-        ),
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                color.withValues(alpha: 0.05),
-                color.withValues(alpha: 0.1),
-              ],
-            ),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: color.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Icon(icon, color: color, size: 28),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  title,
-                  style: TextStyle(
-                    color: Colors.grey.shade800,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
-          ),
-        ),
+        title: Text(assignment['title'] ?? 'Assignment'),
+        subtitle: Text(assignment['due_date'] ?? ''),
+        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
       ),
     );
   }

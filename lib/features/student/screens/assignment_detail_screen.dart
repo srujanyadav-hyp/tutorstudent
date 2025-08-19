@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../widgets/student_scaffold.dart';
+import '../widgets/error_view.dart';
 import '../providers/student_provider.dart';
 import '../widgets/assignment_submission_form.dart';
 import '../../../core/utils/download_helper.dart';
@@ -164,8 +165,12 @@ class AssignmentDetailScreen extends ConsumerWidget {
             ],
           ),
         ),
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => Center(child: Text('Error: $error')),
+        loading: () =>
+            const LoadingView(message: 'Loading assignment details...'),
+        error: (error, stack) => ErrorView(
+          message: 'Failed to load assignment: ${error.toString()}',
+          onRetry: () => ref.refresh(assignmentProvider(assignmentId)),
+        ),
       ),
     );
   }

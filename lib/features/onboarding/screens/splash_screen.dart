@@ -33,14 +33,14 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
     // For existing users, fetch their role from the database
     try {
       final userData = await supabase
-          .from('users')
+          .from('user_profiles')
           .select('role')
           .eq('id', currentUser.id)
           .maybeSingle();
 
       if (context.mounted) {
-        if (userData?['role'] != null) {
-          String roleStr = userData!['role'] as String;
+        if (userData != null && userData['role'] != null) {
+          String roleStr = userData['role'] as String;
           // Navigate to role-specific dashboard
           switch (roleStr) {
             case 'tutor':
@@ -49,19 +49,29 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
             case 'student':
               context.go('/student');
               break;
-
-              break;
             default:
               context.go('/onboarding');
           }
         } else {
           // If no role found, send to onboarding
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'User profile not found. Please complete onboarding.',
+              ),
+            ),
+          );
           context.go('/onboarding');
         }
       }
     } catch (e) {
-      // If error occurs, send to onboarding
       if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error loading profile: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
         context.go('/onboarding');
       }
     }

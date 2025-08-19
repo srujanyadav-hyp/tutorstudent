@@ -62,10 +62,20 @@ class ProfileService {
         '${user.id}_${DateTime.now().millisecondsSinceEpoch}.$fileExt';
     final filePath = 'profile_images/$fileName';
 
-    await _client.storage.from('public').upload(filePath, imageFile);
-
-    final imageUrl = _client.storage.from('public').getPublicUrl(filePath);
-    return imageUrl;
+    try {
+      await _client.storage.from('profile-assets').upload(filePath, imageFile);
+      final imageUrl = _client.storage
+          .from('profile-assets')
+          .getPublicUrl(filePath);
+      return imageUrl;
+    } catch (e) {
+      if (e.toString().contains('Bucket not found')) {
+        throw Exception(
+          'Storage not configured. Please create a "public" bucket in Supabase storage.',
+        );
+      }
+      throw Exception('Failed to upload image: $e');
+    }
   }
 
   Future<void> updateProfile(UserProfile profile) async {
@@ -92,7 +102,9 @@ class ProfileService {
   }
 
   Future<void> updatePassword(
-      String currentPassword, String newPassword) async {
+    String currentPassword,
+    String newPassword,
+  ) async {
     final user = _client.auth.currentUser;
     if (user == null) throw Exception('Not authenticated');
 
@@ -103,9 +115,7 @@ class ProfileService {
     );
 
     // If sign in successful, update password
-    await _client.auth.updateUser(
-      UserAttributes(password: newPassword),
-    );
+    await _client.auth.updateUser(UserAttributes(password: newPassword));
   }
 
   Future<void> updateEmail(String newEmail, String password) async {
@@ -119,9 +129,7 @@ class ProfileService {
     );
 
     // If sign in successful, update email
-    await _client.auth.updateUser(
-      UserAttributes(email: newEmail),
-    );
+    await _client.auth.updateUser(UserAttributes(email: newEmail));
   }
 
   Future<void> deleteAccount(String password) async {

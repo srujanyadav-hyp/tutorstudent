@@ -16,10 +16,11 @@ void main() async {
   // Initialize environment variables
   await dotenv.load(fileName: ".env");
 
-  // Initialize Supabase
+  // Initialize Supabase with realtime enabled for chat and live sessions
   await Supabase.initialize(
     url: EnvConfig.supabaseUrl,
     anonKey: EnvConfig.supabaseAnonKey,
+    realtimeClientOptions: const RealtimeClientOptions(eventsPerSecond: 40),
   );
 
   // Initialize Hive

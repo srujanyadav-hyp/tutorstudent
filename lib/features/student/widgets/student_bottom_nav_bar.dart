@@ -9,8 +9,13 @@ class StudentBottomNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BottomNavigationBar(
-      currentIndex: currentIndex,
+      currentIndex: currentIndex.clamp(0, 4),
       type: BottomNavigationBarType.fixed,
+      elevation: 8,
+      backgroundColor: Colors.white,
+      selectedItemColor: Theme.of(context).primaryColor,
+      unselectedItemColor: Colors.grey[600],
+      selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600),
       items: const [
         BottomNavigationBarItem(
           icon: Icon(Icons.dashboard),
@@ -25,14 +30,7 @@ class StudentBottomNavBar extends StatelessWidget {
           icon: Icon(Icons.assignment),
           label: 'Assignments',
         ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.trending_up),
-          label: 'Progress',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.school),
-          label: 'Resources',
-        ),
+        BottomNavigationBarItem(icon: Icon(Icons.school), label: 'Resources'),
       ],
       onTap: (index) {
         switch (index) {
@@ -49,9 +47,6 @@ class StudentBottomNavBar extends StatelessWidget {
             context.go('/student/assignments');
             break;
           case 4:
-            context.go('/student/progress');
-            break;
-          case 5:
             context.go('/student/resources');
             break;
         }

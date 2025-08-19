@@ -3,7 +3,6 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'student_profile.freezed.dart';
 part 'student_profile.g.dart';
 
-@JsonSerializable(fieldRename: FieldRename.snake)
 @freezed
 class StudentProfile with _$StudentProfile {
   const factory StudentProfile({

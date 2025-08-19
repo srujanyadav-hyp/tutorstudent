@@ -14,10 +14,10 @@ class TutorDashboardService {
       final DateTime now = DateTime.now();
       final DateTime monthStart = DateTime(now.year, now.month, 1);
 
-      // Get total sessions and calculate metrics
+      // 1) Sessions for this tutor (class_sessions)
       final sessionsQuery = await _supabase
-          .from('sessions')
-          .select('id, created_at, amount')
+          .from('class_sessions')
+          .select('id, created_at')
           .eq('tutor_id', tutorId);
 
       final sessions = sessionsQuery as List;
@@ -40,15 +40,9 @@ class TutorDashboardService {
         earningMetrics.add(EarningMetric(date: date, amount: 0));
       }
 
-      // Process all sessions
+      // Process all sessions for session counts (no amounts here)
       for (final session in sessions) {
-        final amount = (session['amount'] as num).toDouble();
-        totalEarnings += amount;
-
-        final sessionDate = DateTime.parse(session['created_at']);
-        if (sessionDate.isAfter(monthStart)) {
-          monthlyEarnings += amount;
-        }
+        final sessionDate = DateTime.parse(session['created_at'] as String);
 
         // Update daily metrics for the last 7 days
         final daysAgo = now.difference(sessionDate).inDays;
@@ -62,6 +56,33 @@ class TutorDashboardService {
             sessionMetrics[index] = sessionMetrics[index].copyWith(
               sessionCount: sessionMetrics[index].sessionCount + 1,
             );
+          }
+        }
+      }
+
+      // 2) Paid bookings for earnings (session_bookings)
+      final bookingsQuery = await _supabase
+          .from('session_bookings')
+          .select('amount, created_at')
+          .eq('tutor_id', tutorId)
+          .eq('payment_status', 'paid');
+
+      final bookings = bookingsQuery as List;
+
+      for (final booking in bookings) {
+        final amount = (booking['amount'] as num?)?.toDouble() ?? 0.0;
+        totalEarnings += amount;
+
+        final createdAt = DateTime.parse(booking['created_at'] as String);
+        if (createdAt.isAfter(monthStart)) {
+          monthlyEarnings += amount;
+        }
+
+        // Update earning metrics for the last 7 days
+        final daysAgo = now.difference(createdAt).inDays;
+        if (daysAgo <= 6) {
+          final index = 6 - daysAgo;
+          if (index >= 0 && index < 7) {
             earningMetrics[index] = earningMetrics[index].copyWith(
               amount: earningMetrics[index].amount + amount,
             );
@@ -71,8 +92,8 @@ class TutorDashboardService {
 
       // Get upcoming sessions
       final upcomingSessionsRes = await _supabase
-          .from('sessions')
-          .select()
+          .from('class_sessions')
+          .select('id')
           .eq('tutor_id', tutorId)
           .gt('scheduled_at', now.toIso8601String());
       final upcomingSessions = (upcomingSessionsRes as List).length;

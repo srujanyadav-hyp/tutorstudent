@@ -16,6 +16,7 @@ class TutorListScreen extends ConsumerStatefulWidget {
 
 class _TutorListScreenState extends ConsumerState<TutorListScreen> {
   late PaymentService _paymentService;
+  String? _pendingTutorId;
 
   @override
   void initState() {
@@ -41,8 +42,40 @@ class _TutorListScreenState extends ConsumerState<TutorListScreen> {
         ),
       );
     }
-    // You can also trigger the connectWithTutor here if payment is successful
-    // _connectWithTutor();
+    // Connect student to tutor automatically after payment success
+    final studentId = ref
+        .read(supabaseServiceProvider)
+        .client
+        .auth
+        .currentUser
+        ?.id;
+    final tutorId = _pendingTutorId;
+    if (studentId != null && tutorId != null) {
+      ref
+          .read(studentNotifierProvider(studentId).notifier)
+          .connectWithTutor(tutorId)
+          .then((_) {
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('You are now connected to the tutor.'),
+                ),
+              );
+              // Clear pending tutor
+              setState(() => _pendingTutorId = null);
+            }
+          })
+          .catchError((e) {
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Failed to connect to tutor: $e'),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
+          });
+    }
   }
 
   void _handlePaymentError(PaymentFailureResponse response) {
@@ -115,42 +148,33 @@ class _TutorListScreenState extends ConsumerState<TutorListScreen> {
               itemCount: tutors.length,
               itemBuilder: (context, index) {
                 final tutor = tutors[index];
+                final pricingPlan =
+                    tutor['pricing_plan'] as Map<String, dynamic>?;
+                final double monthlyFee =
+                    pricingPlan != null && pricingPlan['monthly_rate'] != null
+                    ? (pricingPlan['monthly_rate'] as num).toDouble()
+                    : 0.0;
                 return TutorListItem(
-                  tutor: tutor,
+                  tutorName: tutor['full_name'] ?? 'Unknown',
+                  subject: tutor['subject'] ?? 'Unknown',
+                  monthlyFee: monthlyFee,
                   onConnect: () async {
                     try {
-                      // Get the tutor's hourly rate from their subjects
-                      final tutorSubjects = tutor['tutor_subjects'] as List?;
-                      double hourlyRate = 500.0; // Default rate
-
-                      if (tutorSubjects != null && tutorSubjects.isNotEmpty) {
-                        // Use the first available subject's hourly rate, or average if multiple
-                        final rates = tutorSubjects
-                            .where((subject) => subject['hourly_rate'] != null)
-                            .map(
-                              (subject) =>
-                                  (subject['hourly_rate'] as num).toDouble(),
-                            )
-                            .toList();
-
-                        if (rates.isNotEmpty) {
-                          hourlyRate =
-                              rates.reduce((a, b) => a + b) / rates.length;
-                        }
+                      if (monthlyFee <= 0) {
+                        throw Exception('Tutor has not set a monthly fee.');
                       }
-
-                      // Convert hourly rate to connection fee (e.g., 1 hour worth)
-                      final int amount = (hourlyRate * 100)
+                      final int amount = (monthlyFee * 100)
                           .round(); // Convert to paisa
-
                       _paymentService.openCheckout(
                         amount: amount,
                         name: 'TutorConnect',
                         description:
-                            'Connect with Tutor: ${tutor['full_name']} (₹${hourlyRate.toStringAsFixed(0)}/hr)',
+                            'Connect with Tutor: ${tutor['full_name']} (₹${monthlyFee.toStringAsFixed(0)}/month)',
                         contact: user.phone,
                         email: user.email,
                       );
+                      // Store selected tutorId temporarily for post-payment connect
+                      _pendingTutorId = tutor['id'] as String;
                     } catch (e) {
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(

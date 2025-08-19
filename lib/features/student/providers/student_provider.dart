@@ -56,6 +56,15 @@ final sessionProvider = FutureProvider.family<Map<String, dynamic>, String>((
   return service.getSessionDetails(sessionId);
 });
 
+final studentResourcesProvider =
+    FutureProvider.family<List<Map<String, dynamic>>, String>((
+      ref,
+      studentId,
+    ) async {
+      final service = ref.watch(studentServiceProvider);
+      return service.getStudentResources(studentId);
+    });
+
 final studentNotifierProvider =
     StateNotifierProvider.family<StudentNotifier, AsyncValue<void>, String>(
       (ref, studentId) => StudentNotifier(ref, studentId),

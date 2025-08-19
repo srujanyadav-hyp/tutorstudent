@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:go_router/go_router.dart';
-import '../../../core/providers/supabase_provider.dart';
 import '../providers/profile_provider.dart';
 import '../widgets/profile_image_picker.dart';
 import '../widgets/profile_info_form.dart';

@@ -42,28 +42,16 @@ class _EditStudentDialogState extends ConsumerState<EditStudentDialog> {
     final isEditing = widget.student != null;
 
     return AlertDialog(
-      title: Text(isEditing ? 'Edit Student' : 'Add Student'),
+      title: Text(isEditing ? 'Edit Student' : 'Add Student (disabled)'),
       content: Form(
         key: _formKey,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             if (!isEditing)
-              TextFormField(
-                controller: _studentEmailController,
-                decoration: const InputDecoration(
-                  labelText: 'Student Email',
-                  hintText: 'Enter student email to connect with',
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a student email';
-                  }
-                  if (!value.contains('@')) {
-                    return 'Please enter a valid email';
-                  }
-                  return null;
-                },
+              const Text(
+                'Tutors cannot add students manually. Students connect after successful payment.',
+                style: TextStyle(color: Colors.grey),
               ),
             if (isEditing) ...[
               TextFormField(
@@ -122,14 +110,6 @@ class _EditStudentDialogState extends ConsumerState<EditStudentDialog> {
                           ? null
                           : _subjectsController.text,
                     );
-              } else {
-                final supabase = ref.read(supabaseServiceProvider);
-                final user = supabase.client.auth.currentUser;
-                if (user != null) {
-                  await ref
-                      .read(studentManagementProvider(user.id).notifier)
-                      .addStudent(_studentEmailController.text);
-                }
               }
 
               if (context.mounted) {

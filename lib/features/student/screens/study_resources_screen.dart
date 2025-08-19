@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/providers/supabase_provider.dart';
 import '../widgets/student_scaffold.dart';
 
@@ -30,7 +31,7 @@ class _StudyResourcesScreenState extends ConsumerState<StudyResourcesScreen> {
 
     return StudentScaffold(
       title: 'Study Resources',
-      currentIndex: 5, // Assuming this is a new tab
+      currentIndex: 4, // Resources tab index
       actions: [
         IconButton(
           icon: const Icon(Icons.search),
@@ -560,6 +561,12 @@ class _StudyResourcesScreenState extends ConsumerState<StudyResourcesScreen> {
             hintText: 'Search for study materials...',
             prefixIcon: Icon(Icons.search),
           ),
+          onSubmitted: (value) {
+            if (value.isNotEmpty) {
+              Navigator.pop(context);
+              context.go('/student/resources/search?q=$value');
+            }
+          },
         ),
         actions: [
           TextButton(
@@ -568,8 +575,12 @@ class _StudyResourcesScreenState extends ConsumerState<StudyResourcesScreen> {
           ),
           ElevatedButton(
             onPressed: () {
-              // TODO: Implement search functionality
-              Navigator.pop(context);
+              if (_searchController.text.isNotEmpty) {
+                Navigator.pop(context);
+                context.go(
+                  '/student/resources/search?q=${_searchController.text}',
+                );
+              }
             },
             child: const Text('Search'),
           ),
@@ -579,30 +590,33 @@ class _StudyResourcesScreenState extends ConsumerState<StudyResourcesScreen> {
   }
 
   void _navigateToPracticeTests() {
-    // TODO: Navigate to practice tests
+    context.go('/student/resources/practice-tests');
   }
 
   void _navigateToVideoLessons() {
-    // TODO: Navigate to video lessons
+    context.go('/student/resources/videos');
   }
 
   void _navigateToStudyGuides() {
-    // TODO: Navigate to study guides
+    context.go('/student/resources/guides');
   }
 
   void _navigateToFlashcards() {
-    // TODO: Navigate to flashcards
+    context.go('/student/resources/flashcards');
   }
 
   void _navigateToSubject(String subject) {
-    // TODO: Navigate to subject resources
+    final subjectSlug = subject.toLowerCase().replaceAll(' ', '-');
+    context.go('/student/resources/subjects/$subjectSlug');
   }
 
   void _openResource(String title) {
-    // TODO: Open resource
+    final resourceId = title.toLowerCase().replaceAll(' ', '-');
+    context.go('/student/resources/view/$resourceId');
   }
 
   void _startPracticeTest(String title) {
-    // TODO: Start practice test
+    final testId = title.toLowerCase().replaceAll(' ', '-');
+    context.go('/student/resources/practice-tests/$testId');
   }
 }

@@ -77,24 +77,27 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
         children: [
           const Text(
             'Filters',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           const Spacer(),
-          TextButton(
-            onPressed: _resetFilters,
-            child: const Text('Reset'),
-          ),
+          TextButton(onPressed: _resetFilters, child: const Text('Reset')),
         ],
       ),
     );
   }
 
   Widget _buildSubjectFilter() {
-    final subjects = ['All', 'Mathematics', 'Physics', 'Chemistry', 'Biology', 'English', 'History', 'Computer Science'];
-    
+    final subjects = [
+      'All',
+      'Mathematics',
+      'Physics',
+      'Chemistry',
+      'Biology',
+      'English',
+      'History',
+      'Computer Science',
+    ];
+
     return _buildFilterSection(
       'Subject',
       Icons.book,
@@ -105,8 +108,14 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
   }
 
   Widget _buildPriceFilter() {
-    final priceRanges = ['All', 'Under \$20', '\$20 - \$40', '\$40 - \$60', '\$60+'];
-    
+    final priceRanges = [
+      'All',
+      'Under \$20',
+      '\$20 - \$40',
+      '\$40 - \$60',
+      '\$60+',
+    ];
+
     return _buildFilterSection(
       'Price Range',
       Icons.attach_money,
@@ -118,7 +127,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
 
   Widget _buildRatingFilter() {
     final ratings = ['All', '4.0', '4.5', '4.8'];
-    
+
     return _buildFilterSection(
       'Minimum Rating',
       Icons.star,
@@ -137,16 +146,13 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
           const SizedBox(width: 16),
           const Text(
             'Online Only',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-            ),
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
           ),
           const Spacer(),
           Switch(
             value: _isOnlineOnly,
             onChanged: (value) => setState(() => _isOnlineOnly = value),
-            activeColor: Colors.green.shade600,
+            activeThumbColor: Colors.green.shade600,
           ),
         ],
       ),
@@ -187,19 +193,28 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
               return GestureDetector(
                 onTap: () => onChanged(option),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
                   decoration: BoxDecoration(
-                    color: isSelected ? Colors.blue.shade600 : Colors.grey.shade100,
+                    color: isSelected
+                        ? Colors.blue.shade600
+                        : Colors.grey.shade100,
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                      color: isSelected ? Colors.blue.shade600 : Colors.grey.shade300,
+                      color: isSelected
+                          ? Colors.blue.shade600
+                          : Colors.grey.shade300,
                     ),
                   ),
                   child: Text(
                     option,
                     style: TextStyle(
                       color: isSelected ? Colors.white : Colors.grey.shade700,
-                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                      fontWeight: isSelected
+                          ? FontWeight.w600
+                          : FontWeight.w500,
                     ),
                   ),
                 ),

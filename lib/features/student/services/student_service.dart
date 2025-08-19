@@ -162,6 +162,9 @@ class StudentService {
             bio,
             profile_image,
             role_specific_data,
+            pricing_plan:pricing_plans!pricing_plans_tutor_id_fkey(
+              monthly_rate
+            ),
             tutor_reviews:tutor_reviews!tutor_reviews_tutor_id_fkey(rating),
             tutor_subjects:tutor_subjects!tutor_subjects_tutor_id_fkey(
               subject_name,
@@ -187,6 +190,16 @@ class StudentService {
 
         tutor['is_connected'] = connectionResponse != null;
         tutor['connection_id'] = connectionResponse?['id'];
+
+        // Flatten a primary subject for simple display
+        try {
+          final subjects = (tutor['tutor_subjects'] as List?) ?? const [];
+          if (subjects.isNotEmpty) {
+            tutor['subject'] = subjects.first['subject_name'];
+          }
+        } catch (_) {
+          // ignore
+        }
       }
 
       return tutors;
@@ -218,16 +231,20 @@ class StudentService {
     String studentId,
   ) async {
     final nowIso = DateTime.now().toIso8601String();
-    final response = await _supabase
-        .from('class_sessions')
-        .select('''
-          *,
-          student_class_attendance!inner(student_id)
-        ''')
-        .gt('scheduled_at', nowIso)
-        .eq('student_class_attendance.student_id', studentId)
-        .order('scheduled_at');
-    return List<Map<String, dynamic>>.from(response as List);
+    final response = await _supabase.rpc(
+      'get_student_sessions',
+      params: {'p_student_id': studentId},
+    );
+
+    // Filter for upcoming sessions
+    final upcomingSessions = (response as List)
+        .where(
+          (session) =>
+              DateTime.parse(session['scheduled_at']).isAfter(DateTime.now()),
+        )
+        .toList();
+
+    return List<Map<String, dynamic>>.from(upcomingSessions);
   }
 
   Stream<List<Map<String, dynamic>>> streamAssignments(String studentId) {
@@ -467,5 +484,20 @@ class StudentService {
               )
               .length,
         );
+  }
+
+  Future<List<Map<String, dynamic>>> getStudentResources(
+    String studentId,
+  ) async {
+    try {
+      final response = await _supabase.rpc(
+        'get_student_resources',
+        params: {'p_student_id': studentId},
+      );
+
+      return List<Map<String, dynamic>>.from(response as List);
+    } catch (e) {
+      throw 'Failed to get student resources: ${e.toString()}';
+    }
   }
 }
